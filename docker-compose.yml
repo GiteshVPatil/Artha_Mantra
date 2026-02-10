@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:5.0
+    container_name: artha-mantra-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: artha-mantra
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - artha-mantra-network
+
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: artha-mantra-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/artha-mantra?authSource=admin
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      PORT: 5050
+    ports:
+      - "5050:5050"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - artha-mantra-network
+
+  # Frontend React App
+  frontend:
+    build: ./frontend
+    container_name: artha-mantra-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - artha-mantra-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  artha-mantra-network:
+    driver: bridge
