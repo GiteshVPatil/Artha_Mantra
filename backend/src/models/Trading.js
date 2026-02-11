@@ -62,10 +62,14 @@ const tradingSchema = new mongoose.Schema({
   reason: {
     type: String,
     maxlength: 200
+  }, aiAnalysis: {
+    type: String
   }
-}, {
-  timestamps: true
-});
+
+},
+  {
+    timestamps: true
+  });
 
 // Index for efficient querying
 tradingSchema.index({ userId: 1, portfolioId: 1, createdAt: -1 });

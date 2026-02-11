@@ -4,6 +4,7 @@ const { auth } = require('../middleware/auth');
 const Trading = require('../models/Trading');
 const Portfolio = require('../models/Portfolio');
 const { getCachedStocks } = require('../utils/nseStocksCache');
+const { analyzeTrade } = require('../services/aiService'); // ✅ AI SERVICE ADDED
 
 const router = express.Router();
 const TWELVE_DATA_KEY = process.env.TWELVE_DATA_API_KEY;
@@ -198,10 +199,10 @@ router.get('/price/:symbol', auth, async (req, res) => {
 
 /* ========== ALL OTHER LOGIC REMAINS SAME ========== */
 // -- (rest of file unchanged; keep your updatePortfolioAfterTrade,
-/* ========== EXECUTE TRADE ========== */ 
+/* ========== EXECUTE TRADE ========== */
 // holdings, trade history, etc., as you have)
 
-module.exports = router;
+//module.exports = router;
 
 
 /* ========== HELPER: UPDATE PORTFOLIO AFTER TRADE (FIXED P&L CALCULATION) ========== */
@@ -227,7 +228,7 @@ async function updatePortfolioAfterTrade(portfolio, trade) {
       existingHolding.averagePrice = newAveragePrice;
       existingHolding.currentPrice = price;
       existingHolding.totalValue = totalQuantity * price;
-      
+
       // ✅ CORRECT P&L CALCULATION
       const costBasis = totalQuantity * newAveragePrice;
       existingHolding.profitLoss = existingHolding.totalValue - costBasis;
@@ -272,7 +273,7 @@ async function updatePortfolioAfterTrade(portfolio, trade) {
       } else {
         existingHolding.currentPrice = price;
         existingHolding.totalValue = existingHolding.quantity * existingHolding.currentPrice;
-        
+
         const costBasis = existingHolding.quantity * existingHolding.averagePrice;
         existingHolding.profitLoss = existingHolding.totalValue - costBasis;
         existingHolding.profitLossPercentage = costBasis > 0 ? ((existingHolding.profitLoss / costBasis) * 100) : 0;
@@ -306,12 +307,10 @@ router.post('/execute', auth, async (req, res) => {
   try {
     const { portfolioId, symbol, companyName, type, quantity, price, orderType } = req.body;
 
-    // ✅ VALIDATE all required fields
     if (!portfolioId || !symbol || !type || !quantity || price === undefined) {
       return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 
-    // ✅ VALIDATE data types and ranges
     const parsedQuantity = parseInt(quantity);
     const parsedPrice = parseFloat(price);
 
@@ -327,14 +326,6 @@ router.post('/execute', auth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid order type' });
     }
 
-    console.log(`\n📤 EXECUTE TRADE REQUEST:`);
-    console.log(`   Portfolio: ${portfolioId}`);
-    console.log(`   Symbol: ${symbol}`);
-    console.log(`   Type: ${type}`);
-    console.log(`   Quantity: ${parsedQuantity}`);
-    console.log(`   Price: ₹${parsedPrice.toFixed(2)}`);
-    console.log(`   Total: ₹${(parsedQuantity * parsedPrice).toFixed(2)}`);
-
     const portfolio = await Portfolio.findOne({ _id: portfolioId, userId: req.user.id });
 
     if (!portfolio) {
@@ -343,6 +334,7 @@ router.post('/execute', auth, async (req, res) => {
 
     const totalAmount = parsedQuantity * parsedPrice;
 
+    // ================= BUY VALIDATION =================
     if (type === 'BUY') {
       if (portfolio.availableCash < totalAmount) {
         return res.status(400).json({
@@ -352,17 +344,21 @@ router.post('/execute', auth, async (req, res) => {
       }
     }
 
+    // ================= SELL VALIDATION =================
+    let holdingBeforeSell = null;
+
     if (type === 'SELL') {
-      const holding = portfolio.holdings.find(h => h.symbol === symbol);
-      if (!holding || holding.quantity < parsedQuantity) {
+      holdingBeforeSell = portfolio.holdings.find(h => h.symbol === symbol);
+
+      if (!holdingBeforeSell || holdingBeforeSell.quantity < parsedQuantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient shares. You ${holding ? `only have ${holding.quantity}` : 'do not own any'} shares of ${symbol}`
+          message: `Insufficient shares. You ${holdingBeforeSell ? `only have ${holdingBeforeSell.quantity}` : 'do not own any'} shares of ${symbol}`
         });
       }
     }
 
-    // ✅ CREATE TRADE RECORD
+    // ================= CREATE TRADE RECORD =================
     const trade = await Trading.create({
       userId: req.user.id,
       portfolioId,
@@ -378,11 +374,39 @@ router.post('/execute', auth, async (req, res) => {
       executedPrice: parsedPrice
     });
 
-    // ✅ UPDATE PORTFOLIO
+    // ================= AI ANALYSIS ONLY FOR CLOSED SELL =================
+    let aiAnalysisText = null;
+
+    if (type === 'SELL' && holdingBeforeSell) {
+      try {
+        const entryPrice = holdingBeforeSell.averagePrice;
+        const exitPrice = parsedPrice;
+
+        const aiResult = await analyzeTrade({
+          stock: symbol.toUpperCase(),
+          entry_price: entryPrice,
+          exit_price: exitPrice,
+          quantity: parsedQuantity,
+          rsi: 50,
+          macd: 0,
+          volume: 0,
+          sentiment: "Neutral"
+        });
+
+        aiAnalysisText = aiResult.analysis;
+
+        trade.aiAnalysis = aiAnalysisText;
+        await trade.save();
+
+        console.log(`🤖 AI Analysis Generated for ${symbol}`);
+      } catch (aiError) {
+        console.error("AI Integration Error:", aiError.message);
+      }
+    }
+
+    // ================= UPDATE PORTFOLIO =================
     await updatePortfolioAfterTrade(portfolio, trade);
     const updatedPortfolio = await Portfolio.findById(portfolioId);
-
-    console.log(`✅ Trade executed successfully!\n`);
 
     res.status(201).json({
       success: true,
@@ -390,11 +414,13 @@ router.post('/execute', auth, async (req, res) => {
       portfolio: updatedPortfolio,
       message: `${type} order executed successfully!`
     });
+
   } catch (err) {
     console.error('❌ Trade execution error:', err);
     res.status(500).json({ success: false, message: err.message || 'Server error' });
   }
 });
+
 
 /* ========== GET USER'S HOLDINGS FOR SELL ORDERS ========== */
 router.get('/holdings/:portfolioId', auth, async (req, res) => {

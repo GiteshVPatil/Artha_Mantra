@@ -43,3 +43,12 @@ temp/
 *.h5
 *.pkl
 *.joblib
+
+# Python
+ai-service/venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+.env
