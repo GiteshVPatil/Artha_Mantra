@@ -62,7 +62,15 @@ const tradingSchema = new mongoose.Schema({
   reason: {
     type: String,
     maxlength: 200
-  }, aiAnalysis: {
+  }, realizedProfit: {
+    type: Number,
+    default: 0
+  },
+  profitPercentage: {
+    type: Number,
+    default: 0
+  },
+  aiAnalysis: {
     type: String
   }
 

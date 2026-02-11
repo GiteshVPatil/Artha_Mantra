@@ -197,14 +197,6 @@ router.get('/price/:symbol', auth, async (req, res) => {
   });
 });
 
-/* ========== ALL OTHER LOGIC REMAINS SAME ========== */
-// -- (rest of file unchanged; keep your updatePortfolioAfterTrade,
-/* ========== EXECUTE TRADE ========== */
-// holdings, trade history, etc., as you have)
-
-//module.exports = router;
-
-
 /* ========== HELPER: UPDATE PORTFOLIO AFTER TRADE (FIXED P&L CALCULATION) ========== */
 async function updatePortfolioAfterTrade(portfolio, trade) {
   const { symbol, companyName, type, quantity, price } = trade;
@@ -261,6 +253,14 @@ async function updatePortfolioAfterTrade(portfolio, trade) {
       const costOfSoldShares = quantity * existingHolding.averagePrice;
       const revenueFromSale = quantity * price;
       const profitOnSale = revenueFromSale - costOfSoldShares;
+     
+      trade.realizedProfit = profitOnSale;
+      trade.profitPercentage = costOfSoldShares > 0
+        ? (profitOnSale / costOfSoldShares) * 100
+        : 0;
+
+      await trade.save();
+
 
       console.log(`✅ SELL: ${quantity} ${symbol} @ ₹${price.toFixed(2)}`);
       console.log(`   Cost basis: ₹${costOfSoldShares.toFixed(2)}, Revenue: ₹${revenueFromSale.toFixed(2)}, Profit: ₹${profitOnSale.toFixed(2)}`);

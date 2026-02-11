@@ -235,28 +235,52 @@ const Analytics = () => {
   };
 
   const calculateTradeAnalytics = (tradeList) => {
-    if (tradeList.length === 0) return;
-
-    const buyTrades = tradeList.filter(t => t.type === 'BUY');
-    const sellTrades = tradeList.filter(t => t.type === 'SELL');
-
-    const totalTrades = tradeList.length;
-    const totalProfit = sellTrades.reduce((sum, trade) => sum + trade.totalAmount, 0) -
-      buyTrades.reduce((sum, trade) => sum + trade.totalAmount, 0);
-
-    const successfulTrades = sellTrades.length;
-    const winRate = totalTrades > 0 ? (successfulTrades / totalTrades) * 100 : 0;
-    const avgGainPerTrade = totalTrades > 0 ? totalProfit / totalTrades : 0;
-
+  if (tradeList.length === 0) {
     setAnalytics(prev => ({
       ...prev,
-      totalTrades,
-      successfulTrades,
-      totalProfit,
-      winRate,
-      avgGainPerTrade
+      totalTrades: 0,
+      successfulTrades: 0,
+      totalProfit: 0,
+      winRate: 0,
+      avgGainPerTrade: 0
     }));
-  };
+    return;
+  }
+
+  // Only count SELL trades as closed trades
+  const closedTrades = tradeList.filter(t =>
+    t.type === 'SELL' && t.status === 'EXECUTED'
+  );
+
+  const totalClosedTrades = closedTrades.length;
+
+  const winningTrades = closedTrades.filter(t => t.realizedProfit > 0);
+
+  const successfulTrades = winningTrades.length;
+
+  const totalProfit = closedTrades.reduce((sum, trade) =>
+    sum + (trade.realizedProfit || 0), 0);
+
+  const winRate =
+    totalClosedTrades > 0
+      ? (successfulTrades / totalClosedTrades) * 100
+      : 0;
+
+  const avgGainPerTrade =
+    totalClosedTrades > 0
+      ? totalProfit / totalClosedTrades
+      : 0;
+
+  setAnalytics(prev => ({
+    ...prev,
+    totalTrades: totalClosedTrades,
+    successfulTrades,
+    totalProfit,
+    winRate,
+    avgGainPerTrade
+  }));
+};
+
 
   // Styles
   const containerStyle = {
