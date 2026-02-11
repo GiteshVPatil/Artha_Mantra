@@ -9,8 +9,8 @@ const Market = () => {
   const [stockData, setStockData] = useState([]);
   const [stockInfo, setStockInfo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [watchlist, setWatchlist] = useState(['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']);
-  const [search, setSearch] = useState('');
+  const [watchlist, setWatchlist] = useState(['AAPL', 'TSLA']);
+  const [search, setSearch] = useState('');   // 👈 FIXED: Default search
   const [suggestions, setSuggestions] = useState([]);
   const [error, setError] = useState('');
   const [dataSource, setDataSource] = useState('');
@@ -24,34 +24,46 @@ const Market = () => {
     return `₹${(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
   };
 
+  // // 👈 FIXED: Load default stock on mount
+  // useEffect(() => {
+  //   if (selectedStock) {
+  //     fetchStockInfo(selectedStock);
+  //     fetchStockHistory(selectedStock, timeframe);
+  //   }
+  // }, []); // Run once on load
+
   // Autocomplete/symbol search with debouncing
   useEffect(() => {
     if (search.length < 1) {
       setSuggestions([]);
       return;
     }
-    
+
     const timer = setTimeout(async () => {
       try {
         const resp = await axios.get(`${API_BASE}/market-data/search/${search}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSuggestions(resp.data.results || []);
-      } catch {
+        if (resp.data.results?.length === 0) {
+          setError('No stocks found. Try RELIANCE, TCS, HDFCBANK...');
+        }
+      } catch (err) {
+        console.error('Search error:', err);
+        setError('Search unavailable. Check backend.');
         setSuggestions([]);
       }
-    }, 300); // 300ms debounce
-    
+    }, 300);
+
     return () => clearTimeout(timer);
   }, [search, token, API_BASE]);
 
-  // Stock quote and history - only if selectedStock is set
+  // Stock quote and history
   useEffect(() => {
     if (!selectedStock) return;
     setError('');
     fetchStockInfo(selectedStock);
     fetchStockHistory(selectedStock, timeframe);
-    // eslint-disable-next-line
   }, [selectedStock, timeframe]);
 
   const fetchStockInfo = async (symbol) => {
@@ -65,11 +77,11 @@ const Market = () => {
         setChartCurrency(response.data.quote.currency || 'INR');
       } else {
         setStockInfo(null);
-        setError('Stock info not found');
+        setError(`Quote not found for ${symbol}. Try NSE symbols like RELIANCE`);
       }
     } catch (err) {
       setStockInfo(null);
-      setError('Failed to fetch stock information');
+      setError('Quote API down. Check /market-data/quote/:symbol endpoint');
       console.error('Error fetching stock info:', err);
     }
   };
@@ -85,17 +97,16 @@ const Market = () => {
         setStockData(response.data.history);
         setDataSource(response.data.source || 'unknown');
         setChartCurrency(response.data.currency || 'INR');
-        
-        // Validate data quality
+
         const avgPrice = response.data.history.reduce((sum, d) => sum + d.price, 0) / response.data.history.length;
-        console.log(`📊 Chart loaded: ${response.data.history.length} points, Avg: ${formatCurrency(avgPrice)}, Currency: ${response.data.currency || 'INR'}`);
+        console.log(`📊 Chart loaded: ${response.data.history.length} points, Avg: ${formatCurrency(avgPrice)}`);
       } else {
         setStockData([]);
-        setError('No chart data available for this period');
+        setError(`No history for ${symbol}. Check /market-data/history/${symbol} endpoint`);
       }
     } catch (err) {
       setStockData([]);
-      setError('Failed to fetch historical data');
+      setError('History API error. Verify backend route');
       console.error('Error fetching stock history:', err);
     }
     setLoading(false);
@@ -133,6 +144,7 @@ const Market = () => {
     }
   }, []);
 
+
   return (
     <div style={{ padding: '30px 20px', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
@@ -162,12 +174,13 @@ const Market = () => {
             }}
             onChange={e => {
               setSearch(e.target.value.toUpperCase());
-              setError('');
+              setError(''); // 👈 Clear error on type
+              setSelectedStock(''); // 👈 Clear chart until select
               if (e.target.value.length === 0) {
-                setSelectedStock('');
                 setSuggestions([]);
               }
             }}
+
           />
           {suggestions.length > 0 && (
             <div style={{
@@ -207,11 +220,11 @@ const Market = () => {
 
       {/* Error Message */}
       {error && (
-        <div style={{ 
-          margin: '10px 0', 
-          color: '#d93025', 
-          background: '#fef2f2', 
-          borderRadius: 8, 
+        <div style={{
+          margin: '10px 0',
+          color: '#d93025',
+          background: '#fef2f2',
+          borderRadius: 8,
           padding: 14,
           border: '1px solid #fecaca'
         }}>
@@ -225,26 +238,26 @@ const Market = () => {
           {/* Stock Header */}
           {selectedStock && stockInfo && (
             <div style={{
-              display: 'flex', 
-              justifyContent: 'space-between', 
+              display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: '#f8f9fa', 
-              padding: 20, 
-              borderRadius: 12, 
+              backgroundColor: '#f8f9fa',
+              padding: 20,
+              borderRadius: 12,
               marginBottom: 20,
               boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
                 <div style={{
-                  width: 60, 
-                  height: 60, 
-                  borderRadius: '50%', 
+                  width: 60,
+                  height: 60,
+                  borderRadius: '50%',
                   background: '#1a73e8',
-                  display: 'flex', 
-                  alignItems: 'center', 
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'white', 
-                  fontSize: '1.5rem', 
+                  color: 'white',
+                  fontSize: '1.5rem',
                   fontWeight: 'bold'
                 }}>
                   {selectedStock.substring(0, 2)}
@@ -266,7 +279,7 @@ const Market = () => {
                   {formatCurrency(stockInfo.currentPrice)}
                 </div>
                 <div style={{
-                  fontSize: '1.2rem', 
+                  fontSize: '1.2rem',
                   fontWeight: '600',
                   color: (stockInfo.change || 0) >= 0 ? '#137333' : '#d93025'
                 }}>
@@ -278,12 +291,12 @@ const Market = () => {
                 onClick={addToWatchlist}
                 disabled={watchlist.includes(selectedStock)}
                 style={{
-                  padding: '10px 20px', 
-                  backgroundColor: watchlist.includes(selectedStock) ? '#dadce0' : '#34a853', 
-                  color: 'white', 
+                  padding: '10px 20px',
+                  backgroundColor: watchlist.includes(selectedStock) ? '#dadce0' : '#34a853',
+                  color: 'white',
                   border: 'none',
-                  borderRadius: '8px', 
-                  cursor: watchlist.includes(selectedStock) ? 'not-allowed' : 'pointer', 
+                  borderRadius: '8px',
+                  cursor: watchlist.includes(selectedStock) ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '500',
                   transition: 'background-color 0.2s'
@@ -296,17 +309,17 @@ const Market = () => {
 
           {/* Chart */}
           <div style={{
-            backgroundColor: 'white', 
-            borderRadius: '12px', 
+            backgroundColor: 'white',
+            borderRadius: '12px',
             padding: '25px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', 
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
             marginBottom: '20px'
           }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '20px' 
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px'
             }}>
               <div>
                 <h3 style={{ margin: 0, color: '#202124' }}>Price Chart</h3>
@@ -321,12 +334,12 @@ const Market = () => {
                   <button
                     key={period}
                     style={{
-                      padding: '8px 16px', 
-                      margin: '0 4px', 
-                      borderRadius: '20px', 
-                      background: timeframe === period ? '#1a73e8' : 'white', 
-                      color: timeframe === period ? 'white' : '#5f6368', 
-                      border: `1px solid ${timeframe === period ? '#1a73e8' : '#dadce0'}`, 
+                      padding: '8px 16px',
+                      margin: '0 4px',
+                      borderRadius: '20px',
+                      background: timeframe === period ? '#1a73e8' : 'white',
+                      color: timeframe === period ? 'white' : '#5f6368',
+                      border: `1px solid ${timeframe === period ? '#1a73e8' : '#dadce0'}`,
                       fontWeight: 500,
                       cursor: 'pointer',
                       fontSize: '12px',
@@ -339,12 +352,12 @@ const Market = () => {
                 ))}
               </div>
             </div>
-            
+
             {loading ? (
-              <div style={{ 
-                height: '400px', 
-                display: 'flex', 
-                alignItems: 'center', 
+              <div style={{
+                height: '400px',
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
                 color: '#5f6368'
               }}>
@@ -357,16 +370,16 @@ const Market = () => {
               <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={stockData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="#5f6368" 
+                  <XAxis
+                    dataKey="date"
+                    stroke="#5f6368"
                     fontSize={12}
                     angle={-45}
                     textAnchor="end"
                     height={80}
                   />
-                  <YAxis 
-                    stroke="#5f6368" 
+                  <YAxis
+                    stroke="#5f6368"
                     fontSize={12}
                     tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
                   />
@@ -391,10 +404,10 @@ const Market = () => {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ 
-                height: '400px', 
-                display: 'flex', 
-                alignItems: 'center', 
+              <div style={{
+                height: '400px',
+                display: 'flex',
+                alignItems: 'center',
                 justifyContent: 'center',
                 color: '#5f6368',
                 fontSize: '16px'
@@ -410,10 +423,10 @@ const Market = () => {
           {/* Stock Details */}
           {selectedStock && stockInfo && (
             <div style={{
-              backgroundColor: 'white', 
-              borderRadius: '12px', 
+              backgroundColor: 'white',
+              borderRadius: '12px',
               padding: '25px',
-              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', 
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
               marginBottom: '20px'
             }}>
               <h3 style={{ marginBottom: '20px', color: '#202124' }}>Stock Details</h3>
@@ -427,8 +440,8 @@ const Market = () => {
                 <div>
                   <div style={{ fontSize: '14px', color: '#5f6368', marginBottom: '5px' }}>Market Cap</div>
                   <div style={{ fontSize: '1.2rem', fontWeight: '600' }}>
-                    {stockInfo?.marketCap > 0 
-                      ? formatCurrency(stockInfo.marketCap / 1e9) + 'B' 
+                    {stockInfo?.marketCap > 0
+                      ? formatCurrency(stockInfo.marketCap / 1e9) + 'B'
                       : 'N/A'}
                   </div>
                 </div>
@@ -446,17 +459,17 @@ const Market = () => {
         {/* Sidebar - Watchlist */}
         <div>
           <div style={{
-            backgroundColor: 'white', 
-            borderRadius: '12px', 
+            backgroundColor: 'white',
+            borderRadius: '12px',
             padding: '25px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', 
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
             marginBottom: '20px'
           }}>
             <h3 style={{ marginBottom: '20px', color: '#202124' }}>📋 Watchlist</h3>
             {watchlist.length === 0 ? (
-              <div style={{ 
-                textAlign: 'center', 
-                color: '#5f6368', 
+              <div style={{
+                textAlign: 'center',
+                color: '#5f6368',
                 padding: '40px 20px',
                 fontSize: '14px'
               }}>
@@ -509,11 +522,11 @@ const Market = () => {
                       e.stopPropagation();
                       removeFromWatchlist(symbol);
                     }}
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      color: '#d93025', 
-                      cursor: 'pointer', 
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#d93025',
+                      cursor: 'pointer',
                       fontSize: 20,
                       fontWeight: 'bold',
                       padding: '5px 10px',
