@@ -1106,7 +1106,7 @@
     "currency": "INR"
   },
   {
-    "symbol": "ARISINFRA",
+    "symbol": "ARIS",
     "name": "Arisinfra Solutions Limited",
     "exchange": "NSE",
     "region": "India",
@@ -2872,13 +2872,6 @@
   {
     "symbol": "CIPLA",
     "name": "Cipla Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "CLCIND",
-    "name": "CLC Industries Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -5609,13 +5602,6 @@
   {
     "symbol": "HDFCLIFE",
     "name": "HDFC Life Insurance Company Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "HDIL",
-    "name": "Housing Development and Infrastructure Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -8710,13 +8696,6 @@
   {
     "symbol": "MEESHO",
     "name": "Meesho Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "MEGASOFT",
-    "name": "Megasoft Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -12677,6 +12656,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "SIGMAADV",
+    "name": "SIGMA ADVANCED SYSTEMS LIMITED",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "SIGNATURE",
     "name": "Signatureglobal (India) Limited",
     "exchange": "NSE",
@@ -12707,13 +12693,6 @@
   {
     "symbol": "SILGO",
     "name": "Silgo Retail Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "SILGO-RE1",
-    "name": "Silgo Retail Ltd-RE",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -13463,6 +13442,13 @@
   {
     "symbol": "SUPREME",
     "name": "Supreme Holdings & Hospitality (India) Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "SUPREMEENG",
+    "name": "Supreme Engineering Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
