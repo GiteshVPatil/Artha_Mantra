@@ -16,6 +16,10 @@ client = InferenceClient(
     token=HF_API_KEY
 )
 
+# ======================================================
+# 🔹 TRADE ANALYSIS MODEL
+# ======================================================
+
 class TradeData(BaseModel):
     stock: str
     entry_price: float
@@ -29,16 +33,25 @@ class TradeData(BaseModel):
 
 @app.get("/")
 def root():
-    return {"message": "Artha-Mantra AI Service Running (Optimized Mode)"}
+    return {"message": "Artha-Mantra AI Service Running (Stable Mode)"}
 
+
+# ======================================================
+# 🔹 TRADE ANALYSIS ENDPOINT
+# ======================================================
 
 @app.post("/analyze-trade")
 def analyze_trade(data: TradeData):
 
+    # Safe Profit Calculation
     profit = (data.exit_price - data.entry_price) * data.quantity
-    profit_percentage = ((data.exit_price - data.entry_price) / data.entry_price) * 100
 
-    # 🚀 Optimized Prompt (Shorter, Structured, No Essay)
+    # Safe Percentage Calculation
+    if data.entry_price and data.entry_price != 0:
+        profit_percentage = ((data.exit_price - data.entry_price) / data.entry_price) * 100
+    else:
+        profit_percentage = 0
+
     prompt = f"""
 You are a beginner-friendly trading mentor.
 
@@ -63,38 +76,31 @@ Trade Summary:
 - Short explanation (2–3 lines max)
 
 What Went Right:
-- Bullet points (if anything good happened)
+- Bullet points
 
 What Went Wrong:
-- Bullet points (simple language)
+- Bullet points
 
 Risk Check:
-- Did you manage risk properly?
-- Was position size reasonable?
+- Was risk managed properly?
 
 What You Should Learn:
-- 3 clear beginner-friendly lessons
+- 3 beginner-friendly lessons
 
 Final Grade:
 - Grade (A-F)
-- 2 line explanation why
+- Short explanation
 
-Rules:
-- Use very simple language.
-- Avoid complex technical terms.
-- Keep it educational.
-- Do not write long paragraphs.
-- Maximum 400-500 words.
+Keep it simple. Avoid long paragraphs.
 """
-
 
     try:
         response = client.chat_completion(
             messages=[
-                {"role": "system", "content": "You are a strict professional trading mentor."},
+                {"role": "system", "content": "You are a professional trading mentor."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=1200,   # 🔥 Increased limit
+            max_tokens=900,
             temperature=0.3,
         )
 
@@ -107,4 +113,66 @@ Rules:
         "profit": profit,
         "profit_percentage": profit_percentage,
         "analysis": analysis_text
+    }
+
+
+# ======================================================
+# 🔹 MONTHLY REPORT MODEL (ONLY ONE — FIXED)
+# ======================================================
+
+class MonthlyReportRequest(BaseModel):
+    totalTrades: int
+    winRate: float
+    biggestWin: float
+    biggestLoss: float
+    avgProfit: float
+
+
+# ======================================================
+# 🔹 MONTHLY PERSONALITY REPORT ENDPOINT
+# ======================================================
+
+@app.post("/monthly-report")
+def generate_monthly_report(data: MonthlyReportRequest):
+
+    prompt = f"""
+You are a trading psychology expert.
+
+Analyze this trader's monthly performance:
+
+Total Trades: {data.totalTrades}
+Win Rate: {data.winRate}%
+Biggest Win: {data.biggestWin}
+Biggest Loss: {data.biggestLoss}
+Average Profit: {data.avgProfit}
+
+Generate a structured beginner-friendly report:
+
+1. Trader Personality Type (1 line)
+2. Strengths (bullet points)
+3. Weaknesses (bullet points)
+4. Risk Behaviour (Low/Medium/High + short reason)
+5. Emotional Discipline Score (1-10)
+6. One Clear Improvement Strategy
+
+Keep it concise and simple.
+"""
+
+    try:
+        response = client.chat_completion(
+            messages=[
+                {"role": "system", "content": "You are a trading psychology mentor."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=700,
+            temperature=0.4,
+        )
+
+        report_text = response.choices[0].message["content"]
+
+    except Exception as e:
+        report_text = f"AI generation failed: {str(e)}"
+
+    return {
+        "report": report_text
     }

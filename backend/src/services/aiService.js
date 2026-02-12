@@ -7,7 +7,7 @@ async function analyzeTrade(tradeData) {
     const response = await axios.post(`${AI_SERVICE_URL}/analyze-trade`, tradeData);
     return response.data;
   } catch (error) {
-    console.error("AI Service Error:", error.message);
+    console.error("AI Trade Service Error:", error.message);
     return {
       profit: tradeData.exit_price - tradeData.entry_price,
       profit_percentage: 0,
@@ -16,4 +16,20 @@ async function analyzeTrade(tradeData) {
   }
 }
 
-module.exports = { analyzeTrade };
+async function generateMonthlyReport(metrics) {
+  try {
+    const response = await axios.post(
+      `${AI_SERVICE_URL}/monthly-report`,
+      metrics
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Monthly Report AI Error:", error.message);
+    return {
+      report: "AI monthly personality report unavailable."
+    };
+  }
+}
+
+
+module.exports = { analyzeTrade, generateMonthlyReport };

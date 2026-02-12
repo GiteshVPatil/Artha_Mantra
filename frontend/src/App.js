@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import Analytics from './pages/Analytics';
 import Notifications from './pages/Notifications';
+import AIReport from "./pages/AIReport";
 
 // Components
 import Navbar from './components/Layout/Navbar';
@@ -61,6 +62,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  <Route path="/ai-report" element={<AIReport />} />
                   <Route path="/dashboard" element={
                     <PrivateRoute>
                       <Dashboard />
