@@ -65,6 +65,62 @@ router.get('/monthly-report', auth, async (req, res) => {
         : 0;
 
     // ==========================
+    // 📊 TRADE PATTERN DETECTION
+    // ==========================
+
+    let patterns = [];
+
+    // Win/Loss streak detection
+    let currentStreak = 0;
+    let maxLossStreak = 0;
+    let maxWinStreak = 0;
+
+    trades.forEach((t, i) => {
+      const profit = t.realizedProfit || 0;
+
+      if (profit < 0) {
+        currentStreak = currentStreak <= 0 ? currentStreak - 1 : -1;
+        maxLossStreak = Math.min(maxLossStreak, currentStreak);
+      } else if (profit > 0) {
+        currentStreak = currentStreak >= 0 ? currentStreak + 1 : 1;
+        maxWinStreak = Math.max(maxWinStreak, currentStreak);
+      }
+    });
+
+    if (Math.abs(maxLossStreak) >= 3)
+      patterns.push("Multiple consecutive losses detected (Revenge Trading Risk)");
+
+    if (maxWinStreak >= 3)
+      patterns.push("Strong winning streak behavior");
+
+    // Risk Reward
+    const avgWin =
+      wins.length > 0
+        ? wins.reduce((sum, t) => sum + t.realizedProfit, 0) / wins.length
+        : 0;
+
+    const avgLossValue =
+      losses.length > 0
+        ? Math.abs(
+          losses.reduce((sum, t) => sum + t.realizedProfit, 0) /
+          losses.length
+        )
+        : 0;
+
+    const riskReward =
+      avgLossValue > 0 ? (avgWin / avgLossValue).toFixed(2) : 0;
+
+    if (riskReward < 1)
+      patterns.push("Risk-Reward ratio below 1 (Losses bigger than wins)");
+
+    if (totalTrades > 10)
+      patterns.push("Overtrading detected (High trade frequency)");
+
+    if (patterns.length === 0)
+      patterns.push("No major behavioral risk patterns detected");
+
+
+    // ==========================
     // 🧠 AI PROMPT
     // ==========================
 
@@ -110,8 +166,10 @@ Keep it concise and clear.
         biggestWin,
         biggestLoss,
         avgProfit
-      }
+      },
+      patterns
     });
+
 
   } catch (error) {
     console.error("AI Monthly Report Error:", error.message);

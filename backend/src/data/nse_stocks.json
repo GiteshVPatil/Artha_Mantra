@@ -1050,6 +1050,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "AQYLON",
+    "name": "Aqylon Nexus Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "ARCHIDPLY",
     "name": "Archidply Industries Limited",
     "exchange": "NSE",
@@ -3628,13 +3635,6 @@
   {
     "symbol": "DIGJAMLMTD",
     "name": "Digjam Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "DIL",
-    "name": "Debock Industries Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -11755,13 +11755,6 @@
   {
     "symbol": "SABEVENTS",
     "name": "Sab Events & Governance Now Media Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "SABTNL",
-    "name": "Sri Adhikari Brothers Television Network Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
