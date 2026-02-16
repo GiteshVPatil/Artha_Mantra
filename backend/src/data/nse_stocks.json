@@ -1596,6 +1596,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "AYE",
+    "name": "Aye Finance Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "AYMSYNTEX",
     "name": "AYM Syntex Limited",
     "exchange": "NSE",
@@ -2018,6 +2025,13 @@
   {
     "symbol": "BFUTILITIE",
     "name": "BF Utilities Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "BGLOBAL",
+    "name": "Bharatiya Global Infomedia Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -2884,6 +2898,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "CLCIND",
+    "name": "CLC Industries Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "CLEAN",
     "name": "Clean Science and Technology Limited",
     "exchange": "NSE",
@@ -2900,6 +2921,13 @@
   {
     "symbol": "CLSEL",
     "name": "Chaman Lal Setia Exports Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "CMICABLES",
+    "name": "CMI Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -3388,6 +3416,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "DCMSIL",
+    "name": "DCM Shriram International Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "DCMSRIND",
     "name": "DCM Shriram Industries Limited",
     "exchange": "NSE",
@@ -3801,6 +3836,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "DSFCL",
+    "name": "DCM Shriram Fine Chemicals Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "DSSL",
     "name": "Dynacons Systems & Solutions Limited",
     "exchange": "NSE",
@@ -3901,6 +3943,13 @@
   {
     "symbol": "EDELWEISS",
     "name": "Edelweiss Financial Services Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "EDUCOMP",
+    "name": "Educomp Solutions Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -4578,6 +4627,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "FRACTAL",
+    "name": "Fractal Analytics Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "FSL",
     "name": "Firstsource Solutions Limited",
     "exchange": "NSE",
@@ -4732,6 +4788,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "GAYAPROJ",
+    "name": "Gayatri Projects Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "GCSL",
     "name": "Gretex Corporate Services Limited",
     "exchange": "NSE",
@@ -4774,6 +4837,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "GENSOL",
+    "name": "Gensol Engineering Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "GENUSPAPER",
     "name": "Genus Paper & Boards Limited",
     "exchange": "NSE",
@@ -4804,6 +4874,13 @@
   {
     "symbol": "GFLLIMITED",
     "name": "GFL Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "GFSTEELS",
+    "name": "Grand Foundry Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -5602,6 +5679,13 @@
   {
     "symbol": "HDFCLIFE",
     "name": "HDFC Life Insurance Company Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "HDIL",
+    "name": "Housing Development and Infrastructure Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -7798,6 +7882,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "KWIL",
+    "name": "Kwality Wall's (India) Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "LAGNAM",
     "name": "Lagnam Spintex Limited",
     "exchange": "NSE",
@@ -9471,6 +9562,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "NEUEON",
+    "name": "Neueon Corporation Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "NEULANDLAB",
     "name": "Neuland Laboratories Limited",
     "exchange": "NSE",
@@ -10969,6 +11067,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "QUINTEGRA",
+    "name": "Quintegra Solutions Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "RACE",
     "name": "Race Eco Chain Limited",
     "exchange": "NSE",
@@ -11083,6 +11188,13 @@
   {
     "symbol": "RAJTV",
     "name": "Raj Television Network Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "RAJVIR",
+    "name": "Rajvir Industries Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -12803,6 +12915,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "SKIL",
+    "name": "SKIL Infrastructure Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "SKIPPER",
     "name": "Skipper Limited",
     "exchange": "NSE",
@@ -13099,6 +13218,13 @@
   {
     "symbol": "SRM",
     "name": "SRM Contractors Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "SRPL",
+    "name": "Shree Ram Proteins Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -13575,6 +13701,13 @@
   {
     "symbol": "SWANCORP",
     "name": "SWAN CORP LIMITED",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "SWANDEF",
+    "name": "Swan Defence and Heavy Industries Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -14611,6 +14744,13 @@
   {
     "symbol": "UNITEDTEA",
     "name": "The United Nilgiri Tea Estates Company Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "UNIVAFOODS",
+    "name": "Univa Foods Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
