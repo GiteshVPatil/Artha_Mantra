@@ -17,6 +17,8 @@ const marketSignalsRoute = require('./routes/marketSignals');
 const aiChatbotRoute = require('./routes/aiChatbot');
 const adminRoutes = require('./routes/admin');
 const newsRoutes = require('./routes/news');
+const aiAnalyticsRoutes = require("./routes/aiAnalytics");
+
 
 const { connectDB } = require('./config/database');
 const { initializeWebSocket } = require('./services/websocket');
@@ -97,7 +99,9 @@ app.use('/api/market-signals', marketSignalsRoute);
 app.use('/api/ai-chatbot', aiChatbotRoute);
 app.use('/api/admin', adminRoutes);
 app.use('/api/news', newsRoutes);
-app.use('/api/market', require('./routes/marketData'));
+//app.use('/api/market', require('./routes/marketData'));
+app.use("/api/ai", aiAnalyticsRoutes);
+app.use("/api/market", require("./routes/market"));
 
 // Error handling middleware
 app.use(errorHandler);

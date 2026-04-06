@@ -20,6 +20,9 @@ const Analytics = () => {
   const [tradingVolumeData, setTradingVolumeData] = useState([]);
   const [stockDistributionData, setStockDistributionData] = useState([]);
   const [aiTrades, setAiTrades] = useState([]);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
 
   const [analytics, setAnalytics] = useState({
     totalTrades: 0,
@@ -54,8 +57,10 @@ const Analytics = () => {
   useEffect(() => {
     if (selectedStock) {
       fetchStockChartData(selectedStock, selectedTimeframe);
+      fetchAIAnalysis(selectedStock); // 👈 ADD THIS
     }
   }, [selectedStock, selectedTimeframe]);
+
 
   const fetchData = async () => {
     try {
@@ -164,38 +169,69 @@ const Analytics = () => {
     }));
   };
 
-  const fetchStockChartData = async (symbol, timeframe) => {
+
+const fetchStockChartData = async (symbol, timeframe) => {
+  if (!symbol) {
+    setStockChartData([]);
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `${API_BASE}/market/history/${symbol}?timeframe=${timeframe}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache"
+        }
+      }
+    );
+
+    console.log("History API FULL:", response);
+
+    if (
+      response.data &&
+      response.data.success === true &&
+      Array.isArray(response.data.data)
+    ) {
+      setStockChartData(response.data.data);
+    } else {
+      setStockChartData([]);
+    }
+
+  } catch (error) {
+    console.error("Historical data fetch failed:", error);
+    setStockChartData([]);
+  }
+};
+
+
+  const fetchAIAnalysis = async (symbol) => {
+    if (!symbol) return;
+
     try {
-      const data = generateMockStockData(symbol, timeframe);
-      setStockChartData(data);
+      setAiLoading(true);
+
+      const response = await axios.get(
+        `${API_BASE}/ai/stock-analysis/${symbol}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        setAiAnalysis(response.data.data);
+      }
+
     } catch (error) {
-      console.error('Error fetching stock chart data:', error);
+      console.error("AI analysis fetch failed:", error);
+      setAiAnalysis(null);
+    } finally {
+      setAiLoading(false);
     }
   };
 
-  const generateMockStockData = (symbol, timeframe) => {
-    const dataPoints = timeframe === '1D' ? 24 : timeframe === '1W' ? 7 : 30;
-    const basePrice = 1000 + Math.random() * 2000; // INR range
-    const data = [];
 
-    for (let i = 0; i < dataPoints; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - (dataPoints - i));
-
-      const volatility = 0.02;
-      const change = (Math.random() - 0.5) * volatility;
-      const price = i === 0 ? basePrice : data[i - 1].price * (1 + change);
-
-      data.push({
-        date: date.toISOString().split('T')[0],
-        price: parseFloat(price.toFixed(2)),
-        volume: Math.floor(Math.random() * 1000000) + 100000,
-        high: parseFloat((price * 1.02).toFixed(2)),
-        low: parseFloat((price * 0.98).toFixed(2))
-      });
-    }
-    return data;
-  };
 
   const generateChartData = (tradeList) => {
     // Generate portfolio performance data
@@ -235,51 +271,51 @@ const Analytics = () => {
   };
 
   const calculateTradeAnalytics = (tradeList) => {
-  if (tradeList.length === 0) {
+    if (tradeList.length === 0) {
+      setAnalytics(prev => ({
+        ...prev,
+        totalTrades: 0,
+        successfulTrades: 0,
+        totalProfit: 0,
+        winRate: 0,
+        avgGainPerTrade: 0
+      }));
+      return;
+    }
+
+    // Only count SELL trades as closed trades
+    const closedTrades = tradeList.filter(t =>
+      t.type === 'SELL' && t.status === 'EXECUTED'
+    );
+
+    const totalClosedTrades = closedTrades.length;
+
+    const winningTrades = closedTrades.filter(t => t.realizedProfit > 0);
+
+    const successfulTrades = winningTrades.length;
+
+    const totalProfit = closedTrades.reduce((sum, trade) =>
+      sum + (trade.realizedProfit || 0), 0);
+
+    const winRate =
+      totalClosedTrades > 0
+        ? (successfulTrades / totalClosedTrades) * 100
+        : 0;
+
+    const avgGainPerTrade =
+      totalClosedTrades > 0
+        ? totalProfit / totalClosedTrades
+        : 0;
+
     setAnalytics(prev => ({
       ...prev,
-      totalTrades: 0,
-      successfulTrades: 0,
-      totalProfit: 0,
-      winRate: 0,
-      avgGainPerTrade: 0
+      totalTrades: totalClosedTrades,
+      successfulTrades,
+      totalProfit,
+      winRate,
+      avgGainPerTrade
     }));
-    return;
-  }
-
-  // Only count SELL trades as closed trades
-  const closedTrades = tradeList.filter(t =>
-    t.type === 'SELL' && t.status === 'EXECUTED'
-  );
-
-  const totalClosedTrades = closedTrades.length;
-
-  const winningTrades = closedTrades.filter(t => t.realizedProfit > 0);
-
-  const successfulTrades = winningTrades.length;
-
-  const totalProfit = closedTrades.reduce((sum, trade) =>
-    sum + (trade.realizedProfit || 0), 0);
-
-  const winRate =
-    totalClosedTrades > 0
-      ? (successfulTrades / totalClosedTrades) * 100
-      : 0;
-
-  const avgGainPerTrade =
-    totalClosedTrades > 0
-      ? totalProfit / totalClosedTrades
-      : 0;
-
-  setAnalytics(prev => ({
-    ...prev,
-    totalTrades: totalClosedTrades,
-    successfulTrades,
-    totalProfit,
-    winRate,
-    avgGainPerTrade
-  }));
-};
+  };
 
 
   // Styles
@@ -609,7 +645,8 @@ const Analytics = () => {
             </div>
           </div>
 
-          {stockChartData.length > 0 ? (
+          {Array.isArray(stockChartData) && stockChartData.length > 0 ? (
+
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={stockChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
@@ -648,19 +685,175 @@ const Analytics = () => {
           )}
         </div>
 
-        {/* Stock Distribution Pie Chart */}
+        {/* ================= AI STOCK INTELLIGENCE ================= */}
+
+        {selectedStock && (
+          <div style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "25px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            marginBottom: "30px"
+          }}>
+            <h3 style={{ marginBottom: "20px" }}>
+              🤖 AI Stock Intelligence — {selectedStock}
+            </h3>
+
+            {aiLoading ? (
+              <div style={{ padding: "30px", textAlign: "center" }}>
+                🔄 Running AI analysis...
+              </div>
+            ) : aiAnalysis ? (
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                gap: "20px"
+              }}>
+
+                {/* Sentiment */}
+                <div style={{
+                  padding: "15px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px"
+                }}>
+                  <h4>📰 Market Sentiment</h4>
+                  <div style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color:
+                      aiAnalysis.sentiment.label === "Bullish"
+                        ? "#137333"
+                        : aiAnalysis.sentiment.label === "Bearish"
+                          ? "#d93025"
+                          : "#5f6368"
+                  }}>
+                    {aiAnalysis.sentiment.label}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#5f6368" }}>
+                    Score: {aiAnalysis.sentiment.score}
+                  </div>
+                </div>
+
+                {/* Prediction */}
+                <div style={{
+                  padding: "15px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px"
+                }}>
+                  <h4>🔮 Price Prediction</h4>
+                  <div>Next Day: ₹{aiAnalysis.prediction.nextDay}</div>
+                  <div>Next Week: ₹{aiAnalysis.prediction.nextWeek}</div>
+                  <div style={{ fontSize: "13px", marginTop: "8px" }}>
+                    Confidence: {(aiAnalysis.prediction.confidence * 100).toFixed(0)}%
+                  </div>
+                </div>
+
+                {/* Technical Indicators */}
+                <div style={{
+                  padding: "15px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px"
+                }}>
+                  <h4>📊 Technical Signals</h4>
+                  <div>SMA 20: ₹{aiAnalysis.technical.sma20?.toFixed(2)}</div>
+                  <div>SMA 50: ₹{aiAnalysis.technical.sma50?.toFixed(2)}</div>
+                  <div>RSI: {aiAnalysis.technical.rsi?.toFixed(2)}</div>
+                </div>
+
+                {/* Final Signal */}
+                <div style={{
+                  padding: "15px",
+                  borderRadius: "10px",
+                  backgroundColor:
+                    aiAnalysis.overallSignal === "BUY"
+                      ? "#e6f4ea"
+                      : aiAnalysis.overallSignal === "SELL"
+                        ? "#fce8e6"
+                        : "#f1f3f4"
+                }}>
+                  <h4>🎯 AI Recommendation</h4>
+                  <div style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    color:
+                      aiAnalysis.overallSignal === "BUY"
+                        ? "#137333"
+                        : aiAnalysis.overallSignal === "SELL"
+                          ? "#d93025"
+                          : "#5f6368"
+                  }}>
+                    {aiAnalysis.overallSignal}
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <div style={{ color: "#5f6368" }}>
+                No AI analysis available.
+              </div>
+            )}
+          </div>
+        )}
+
+
+      </div>
+
+      {/* ================= Portfolio Distribution + Monthly Volume ================= */}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.5fr 1fr",
+          gap: "30px",
+          marginBottom: "30px"
+        }}
+      >
+
+        {/* 📊 Monthly Trading Volume (LEFT) */}
         <div style={chartCardStyle}>
-          <h3 style={{ marginBottom: '20px', color: '#202124' }}>🥧 Portfolio Distribution</h3>
+          <h3 style={{ marginBottom: '20px', color: '#202124' }}>
+            📊 Monthly Trading Volume
+          </h3>
+
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={tradingVolumeData} barSize={30}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
+              <XAxis dataKey="month" stroke="#5f6368" fontSize={12} />
+              <YAxis stroke="#5f6368" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}
+              />
+              <Bar
+                dataKey="trades"
+                fill="#1a73e8"
+                radius={[6, 6, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+
+        {/* 🥧 Portfolio Distribution (RIGHT) */}
+        <div style={chartCardStyle}>
+          <h3 style={{ marginBottom: '20px', color: '#202124' }}>
+            🥧 Portfolio Distribution
+          </h3>
+
           {stockDistributionData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={stockDistributionData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
+                  innerRadius={55}
+                  outerRadius={95}
+                  paddingAngle={4}
                   dataKey="value"
                 >
                   {stockDistributionData.map((entry, index) => (
@@ -672,39 +865,22 @@ const Analytics = () => {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{
-              height: '350px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#5f6368'
-            }}>
+            <div
+              style={{
+                height: '280px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#5f6368'
+              }}
+            >
               No current holdings to display
             </div>
           )}
         </div>
+
       </div>
 
-      {/* Trading Volume Chart */}
-      <div style={chartCardStyle}>
-        <h3 style={{ marginBottom: '20px', color: '#202124' }}>📊 Monthly Trading Volume</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={tradingVolumeData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
-            <XAxis dataKey="month" stroke="#5f6368" fontSize={12} />
-            <YAxis stroke="#5f6368" fontSize={12} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-              }}
-            />
-            <Bar dataKey="trades" fill="#1a73e8" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
         {/* Best Performer */}

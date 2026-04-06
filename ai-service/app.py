@@ -1,20 +1,55 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
-from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 import os
+import requests
 
 load_dotenv()
 
 app = FastAPI()
 
-HF_API_KEY = os.getenv("HF_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-client = InferenceClient(
-    model="mistralai/Mistral-7B-Instruct-v0.2",
-    token=HF_API_KEY
-)
+# ======================================================
+# 🔹 AI CALL FUNCTION (OPENROUTER FREE)
+# ======================================================
+
+def call_ai(prompt):
+    try:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "http://localhost:3000",   # 🔥 REQUIRED
+                "X-Title": "Artha-Mantra"                  # 🔥 REQUIRED
+            },
+            json={
+                "model": "openrouter/free",
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.4
+            }
+        )
+
+        data = response.json()
+
+        # 🔍 DEBUG PRINT (IMPORTANT)
+        print("AI RAW RESPONSE:", data)
+
+        # ✅ SAFE HANDLING
+        if "choices" in data:
+            return data["choices"][0]["message"]["content"]
+        elif "error" in data:
+            return f"AI Error: {data['error']['message']}"
+        else:
+            return "AI returned unexpected response"
+
+    except Exception as e:
+        print("AI ERROR:", e)
+        return f"AI service unavailable: {str(e)}"
 
 # ======================================================
 # 🔹 TRADE ANALYSIS MODEL
@@ -33,7 +68,7 @@ class TradeData(BaseModel):
 
 @app.get("/")
 def root():
-    return {"message": "Artha-Mantra AI Service Running (Stable Mode)"}
+    return {"message": "Artha-Mantra AI Service Running (OpenRouter Mode)"}
 
 
 # ======================================================
@@ -43,10 +78,8 @@ def root():
 @app.post("/analyze-trade")
 def analyze_trade(data: TradeData):
 
-    # Safe Profit Calculation
     profit = (data.exit_price - data.entry_price) * data.quantity
 
-    # Safe Percentage Calculation
     if data.entry_price and data.entry_price != 0:
         profit_percentage = ((data.exit_price - data.entry_price) / data.entry_price) * 100
     else:
@@ -94,20 +127,7 @@ Final Grade:
 Keep it simple. Avoid long paragraphs.
 """
 
-    try:
-        response = client.chat_completion(
-            messages=[
-                {"role": "system", "content": "You are a professional trading mentor."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=900,
-            temperature=0.3,
-        )
-
-        analysis_text = response.choices[0].message["content"]
-
-    except Exception as e:
-        analysis_text = f"AI service temporarily unavailable: {str(e)}"
+    analysis_text = call_ai(prompt)
 
     return {
         "profit": profit,
@@ -117,7 +137,7 @@ Keep it simple. Avoid long paragraphs.
 
 
 # ======================================================
-# 🔹 MONTHLY REPORT MODEL (ONLY ONE — FIXED)
+# 🔹 MONTHLY REPORT MODEL
 # ======================================================
 
 class MonthlyReportRequest(BaseModel):
@@ -136,42 +156,50 @@ class MonthlyReportRequest(BaseModel):
 def generate_monthly_report(data: MonthlyReportRequest):
 
     prompt = f"""
-You are a trading psychology expert.
+You are an expert trading psychology mentor.
 
-Analyze this trader's monthly performance:
+Analyze this trader’s monthly performance deeply but explain in very simple beginner-friendly language.
 
-Total Trades: {data.totalTrades}
-Win Rate: {data.winRate}%
-Biggest Win: {data.biggestWin}
-Biggest Loss: {data.biggestLoss}
-Average Profit: {data.avgProfit}
+Trader Data:
+- Total Trades: {data.totalTrades}
+- Win Rate: {data.winRate}%
+- Biggest Win: {data.biggestWin}
+- Biggest Loss: {data.biggestLoss}
+- Average Profit: {data.avgProfit}
 
-Generate a structured beginner-friendly report:
+Generate a detailed structured report:
 
-1. Trader Personality Type (1 line)
-2. Strengths (bullet points)
-3. Weaknesses (bullet points)
-4. Risk Behaviour (Low/Medium/High + short reason)
-5. Emotional Discipline Score (1-10)
-6. One Clear Improvement Strategy
+1. Trader Personality Type  
+- Give a clear label (e.g., Risky Beginner, Disciplined Trader, Overtrader, etc.)  
+- Explain WHY in 2–3 lines
 
-Keep it concise and simple.
+2. Strengths  
+- 3 to 5 bullet points  
+- Each point should have 1 line explanation
+
+3. Weaknesses  
+- 3 to 5 bullet points  
+- Explain what exactly is going wrong
+
+4. Risk Behaviour  
+- Mention: Low / Medium / High  
+- Explain reasoning in 2–3 lines
+
+5. Emotional Discipline Score (1–10)  
+- Give score  
+- Explain WHY this score in 2–3 lines
+
+6. Improvement Strategy  
+- Give 1 clear actionable plan  
+- Step-by-step (3–5 steps)
+
+IMPORTANT:
+- Keep language simple (like explaining to a beginner)
+- DO NOT be too short
+- DO NOT use complex jargon
+- Keep it readable and structured
 """
-
-    try:
-        response = client.chat_completion(
-            messages=[
-                {"role": "system", "content": "You are a trading psychology mentor."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=700,
-            temperature=0.4,
-        )
-
-        report_text = response.choices[0].message["content"]
-
-    except Exception as e:
-        report_text = f"AI generation failed: {str(e)}"
+    report_text = call_ai(prompt)
 
     return {
         "report": report_text

@@ -49,6 +49,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "5PAISA-RE",
+    "name": "5Paisa Capital Limited-RE",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "63MOONS",
     "name": "63 moons technologies limited",
     "exchange": "NSE",
@@ -86,6 +93,13 @@
   {
     "symbol": "AAREYDRUGS",
     "name": "Aarey Drugs & Pharmaceuticals Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "AARNAV",
+    "name": "Aarnav Fashions Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -413,6 +427,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "AEPL",
+    "name": "Artemis Electricals and Projects Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "AEQUS",
     "name": "Aequs Limited",
     "exchange": "NSE",
@@ -555,6 +576,13 @@
   {
     "symbol": "AHLUCONT",
     "name": "Ahluwalia Contracts (India) Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "AHLWEST",
+    "name": "Asian Hotels (West) Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -828,6 +856,13 @@
   {
     "symbol": "AMDIND",
     "name": "AMD Industries Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "AMIRCHAND",
+    "name": "Amir Chand Jagdish Kumar (Exports) Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -1932,6 +1967,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "BCPL",
+    "name": "BCPL Railway Infrastructure Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "BDL",
     "name": "Bharat Dynamics Limited",
     "exchange": "NSE",
@@ -2331,6 +2373,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "BONLON",
+    "name": "Bonlon Industries Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "BORANA",
     "name": "Borana Weaves Limited",
     "exchange": "NSE",
@@ -2667,6 +2716,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "CEINSYS",
+    "name": "Ceinsys Tech Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "CELEBRITY",
     "name": "Celebrity Fashions Limited",
     "exchange": "NSE",
@@ -2912,6 +2968,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "CLEANMAX",
+    "name": "Clean Max Enviro Energy Solutions Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "CLEDUCATE",
     "name": "CL Educate Limited",
     "exchange": "NSE",
@@ -2928,6 +2991,13 @@
   {
     "symbol": "CMICABLES",
     "name": "CMI Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "CMPDI",
+    "name": "Central Mine Planning & Design Institute Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -3675,6 +3745,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "DIL",
+    "name": "Debock Industries Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "DISHTV",
     "name": "Dish TV India Limited",
     "exchange": "NSE",
@@ -4340,13 +4417,6 @@
     "currency": "INR"
   },
   {
-    "symbol": "EXCEL",
-    "name": "Excel Realty N Infra Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
     "symbol": "EXCELINDUS",
     "name": "Excel Industries Limited",
     "exchange": "NSE",
@@ -4419,6 +4489,13 @@
   {
     "symbol": "FCL",
     "name": "Fineotex Chemical Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "FCONSUMER",
+    "name": "Future Consumer Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -4781,6 +4858,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "GAUDIUMIVF",
+    "name": "Gaudium IVF and Women Health Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "GAYAHWS",
     "name": "Gayatri Highways Limited",
     "exchange": "NSE",
@@ -4902,6 +4986,13 @@
   {
     "symbol": "GICHSGFIN",
     "name": "GIC Housing Finance Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "GICL",
+    "name": "Globe International Carriers Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -5385,6 +5476,13 @@
   {
     "symbol": "GSLSU",
     "name": "Global Surfaces Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "GSPCROP",
+    "name": "GSP Crop Science Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -6300,6 +6398,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "INA",
+    "name": "Insolation Energy Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "INCREDIBLE",
     "name": "INCREDIBLE INDUSTRIES LIMITED",
     "exchange": "NSE",
@@ -6547,6 +6652,13 @@
   {
     "symbol": "INNOVANA",
     "name": "Innovana Thinklabs Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "INNOVISION",
+    "name": "Innovision Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -7086,13 +7198,6 @@
   {
     "symbol": "JOCIL",
     "name": "Jocil Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "JPASSOCIAT",
-    "name": "Jaiprakash Associates Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -7686,6 +7791,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "KOTYARK",
+    "name": "Kotyark Industries Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "KPEL",
     "name": "K.P. Energy Limited",
     "exchange": "NSE",
@@ -7933,6 +8045,13 @@
   {
     "symbol": "LANDMARK",
     "name": "Landmark Cars Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "LANDSMILL",
+    "name": "Landsmill Green Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -8218,7 +8337,7 @@
     "currency": "INR"
   },
   {
-    "symbol": "LTIM",
+    "symbol": "LTM",
     "name": "LTIMindtree Limited",
     "exchange": "NSE",
     "region": "India",
@@ -8346,6 +8465,13 @@
   {
     "symbol": "MAHABANK",
     "name": "Bank of Maharashtra",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "MAHAPE-RE",
+    "name": "Maha Rashtra Apex Corporation Limited-RE",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -8605,6 +8731,13 @@
   {
     "symbol": "MARKSANS",
     "name": "Marksans Pharma Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "MARSONS",
+    "name": "Marsons Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -9681,6 +9814,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "NIMBSPROJ",
+    "name": "Nimbus Projects Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "NINSYS",
     "name": "NINtec Systems Limited",
     "exchange": "NSE",
@@ -9984,6 +10124,13 @@
   {
     "symbol": "OMKARCHEM",
     "name": "Omkar Speciality Chemicals Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "OMNI",
+    "name": "Omnitech Engineering Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -10661,6 +10808,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "PNGSREVA",
+    "name": "PNGS Reva Diamond Jewellery Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "POCL",
     "name": "Pondy Oxides & Chemicals Limited",
     "exchange": "NSE",
@@ -10726,6 +10880,13 @@
   {
     "symbol": "POWERGRID",
     "name": "Power Grid Corporation of India Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "POWERICA",
+    "name": "Powerica Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -11592,6 +11753,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "RMC",
+    "name": "RMC Switchgears Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "RMDRIP",
     "name": "R M Drip and Sprinklers Systems Limited",
     "exchange": "NSE",
@@ -11727,6 +11895,13 @@
   {
     "symbol": "RRKABEL",
     "name": "R R Kabel Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "RSL",
+    "name": "Rajputana Stainless Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -11942,6 +12117,13 @@
     "currency": "INR"
   },
   {
+    "symbol": "SAIPARENT",
+    "name": "Sai Parenterals Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
     "symbol": "SAKAR",
     "name": "Sakar Healthcare Limited",
     "exchange": "NSE",
@@ -12070,13 +12252,6 @@
   {
     "symbol": "SANGAMIND",
     "name": "Sangam (India) Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
-    "symbol": "SANGHIIND",
-    "name": "Sanghi Industries Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -12322,6 +12497,13 @@
   {
     "symbol": "SECURKLOUD",
     "name": "SECUREKLOUD TECHNOLOGIES LIMITED",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "SEDEMAC",
+    "name": "SEDEMAC Mechatronics Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -12622,7 +12804,7 @@
   },
   {
     "symbol": "SHRADHA",
-    "name": "Shradha Infraprojects Limited",
+    "name": "Shradha Realty Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -12847,6 +13029,13 @@
   {
     "symbol": "SINDHUTRAD",
     "name": "Sindhu Trade Links Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "SINGERIND",
+    "name": "Singer India Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -13225,6 +13414,13 @@
   {
     "symbol": "SRPL",
     "name": "Shree Ram Proteins Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "SRTL",
+    "name": "Shree Ram Twistex Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -13939,6 +14135,13 @@
   {
     "symbol": "TBZ",
     "name": "Tribhovandas Bhimji Zaveri Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "TCC",
+    "name": "TCC Concept Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
@@ -15213,6 +15416,13 @@
   {
     "symbol": "VISHWARAJ",
     "name": "Vishwaraj Sugar Industries Limited",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "VITAL",
+    "name": "Vital Chemtech Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"
