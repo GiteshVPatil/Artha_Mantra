@@ -560,7 +560,7 @@ const About = () => {
           }}>
             {/* <div style={{ fontSize: '3rem', marginBottom: '20px' }}>👨‍🏫</div> */}
             <h3 style={{ fontSize: '1.8rem', marginBottom: '10px', color: '#202124', fontWeight: '600' }}>
-              Prof. K. A. Vatekar
+              Prof. P. N. Railkar
             </h3>
             <p style={{ color: '#5f6368', fontSize: '1.1rem', marginBottom: '20px' }}>
               Project Guide | Computer Engineering Department

@@ -191,6 +191,7 @@ const Navbar = () => {
               >
                 News
               </Link>
+              
 
 
               {/* ✅ ROLE-BASED NAVIGATION */}
@@ -251,7 +252,6 @@ const Navbar = () => {
               >
                 About
               </Link>
-
               <div style={{ position: 'relative' }} ref={dropdownRef}>
                 <button
                   style={userButtonStyle}
@@ -299,7 +299,15 @@ const Navbar = () => {
                     >
                       👤 Profile Settings
                     </Link>
-
+                    <Link
+                      to="/ai-report"
+                      style={dropdownItemStyle}
+                      onClick={() => setShowDropdown(false)}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                    >
+                      🧠 AI Report
+                    </Link>
                     <Link
                       to="/notifications"
                       style={dropdownItemStyle}

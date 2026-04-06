@@ -19,7 +19,11 @@ const Analytics = () => {
   const [portfolioPerformanceData, setPortfolioPerformanceData] = useState([]);
   const [tradingVolumeData, setTradingVolumeData] = useState([]);
   const [stockDistributionData, setStockDistributionData] = useState([]);
-  
+  const [aiTrades, setAiTrades] = useState([]);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+
   const [analytics, setAnalytics] = useState({
     totalTrades: 0,
     successfulTrades: 0,
@@ -53,8 +57,10 @@ const Analytics = () => {
   useEffect(() => {
     if (selectedStock) {
       fetchStockChartData(selectedStock, selectedTimeframe);
+      fetchAIAnalysis(selectedStock); // 👈 ADD THIS
     }
   }, [selectedStock, selectedTimeframe]);
+
 
   const fetchData = async () => {
     try {
@@ -94,6 +100,10 @@ const Analytics = () => {
       });
       const tradeList = response.data.trades || [];
       setTrades(tradeList);
+
+      const tradesWithAI = tradeList.filter(trade => trade.aiAnalysis);
+      setAiTrades(tradesWithAI);
+
       calculateTradeAnalytics(tradeList);
       generateChartData(tradeList);
     } catch (error) {
@@ -113,9 +123,9 @@ const Analytics = () => {
       value: holding.totalValue || 0,
       fill: getRandomColor()
     }));
-    
+
     setStockDistributionData(distributionData);
-    
+
     // Set first stock as selected for chart
     if (!selectedStock && holdings.length > 0) {
       setSelectedStock(holdings[0].symbol);
@@ -133,7 +143,7 @@ const Analytics = () => {
     }
 
     // Sort by profit/loss percentage
-    const sortedHoldings = [...holdings].sort((a, b) => 
+    const sortedHoldings = [...holdings].sort((a, b) =>
       (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0)
     );
 
@@ -159,50 +169,81 @@ const Analytics = () => {
     }));
   };
 
-  const fetchStockChartData = async (symbol, timeframe) => {
+
+const fetchStockChartData = async (symbol, timeframe) => {
+  if (!symbol) {
+    setStockChartData([]);
+    return;
+  }
+
+  try {
+    const response = await axios.get(
+      `${API_BASE}/market/history/${symbol}?timeframe=${timeframe}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Cache-Control": "no-cache"
+        }
+      }
+    );
+
+    console.log("History API FULL:", response);
+
+    if (
+      response.data &&
+      response.data.success === true &&
+      Array.isArray(response.data.data)
+    ) {
+      setStockChartData(response.data.data);
+    } else {
+      setStockChartData([]);
+    }
+
+  } catch (error) {
+    console.error("Historical data fetch failed:", error);
+    setStockChartData([]);
+  }
+};
+
+
+  const fetchAIAnalysis = async (symbol) => {
+    if (!symbol) return;
+
     try {
-      const data = generateMockStockData(symbol, timeframe);
-      setStockChartData(data);
+      setAiLoading(true);
+
+      const response = await axios.get(
+        `${API_BASE}/ai/stock-analysis/${symbol}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        setAiAnalysis(response.data.data);
+      }
+
     } catch (error) {
-      console.error('Error fetching stock chart data:', error);
+      console.error("AI analysis fetch failed:", error);
+      setAiAnalysis(null);
+    } finally {
+      setAiLoading(false);
     }
   };
 
-  const generateMockStockData = (symbol, timeframe) => {
-    const dataPoints = timeframe === '1D' ? 24 : timeframe === '1W' ? 7 : 30;
-    const basePrice = 1000 + Math.random() * 2000; // INR range
-    const data = [];
 
-    for (let i = 0; i < dataPoints; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - (dataPoints - i));
-      
-      const volatility = 0.02;
-      const change = (Math.random() - 0.5) * volatility;
-      const price = i === 0 ? basePrice : data[i-1].price * (1 + change);
-      
-      data.push({
-        date: date.toISOString().split('T')[0],
-        price: parseFloat(price.toFixed(2)),
-        volume: Math.floor(Math.random() * 1000000) + 100000,
-        high: parseFloat((price * 1.02).toFixed(2)),
-        low: parseFloat((price * 0.98).toFixed(2))
-      });
-    }
-    return data;
-  };
 
   const generateChartData = (tradeList) => {
     // Generate portfolio performance data
     const performanceData = [];
     let cumulativeValue = 100000;
-    
+
     for (let i = 0; i < 30; i++) {
       const date = new Date();
       date.setDate(date.getDate() - (30 - i));
       const change = (Math.random() - 0.45) * 0.02;
       cumulativeValue *= (1 + change);
-      
+
       performanceData.push({
         date: date.toLocaleDateString(),
         value: parseFloat(cumulativeValue.toFixed(2)),
@@ -230,28 +271,52 @@ const Analytics = () => {
   };
 
   const calculateTradeAnalytics = (tradeList) => {
-    if (tradeList.length === 0) return;
+    if (tradeList.length === 0) {
+      setAnalytics(prev => ({
+        ...prev,
+        totalTrades: 0,
+        successfulTrades: 0,
+        totalProfit: 0,
+        winRate: 0,
+        avgGainPerTrade: 0
+      }));
+      return;
+    }
 
-    const buyTrades = tradeList.filter(t => t.type === 'BUY');
-    const sellTrades = tradeList.filter(t => t.type === 'SELL');
-    
-    const totalTrades = tradeList.length;
-    const totalProfit = sellTrades.reduce((sum, trade) => sum + trade.totalAmount, 0) -
-                       buyTrades.reduce((sum, trade) => sum + trade.totalAmount, 0);
-    
-    const successfulTrades = sellTrades.length;
-    const winRate = totalTrades > 0 ? (successfulTrades / totalTrades) * 100 : 0;
-    const avgGainPerTrade = totalTrades > 0 ? totalProfit / totalTrades : 0;
+    // Only count SELL trades as closed trades
+    const closedTrades = tradeList.filter(t =>
+      t.type === 'SELL' && t.status === 'EXECUTED'
+    );
+
+    const totalClosedTrades = closedTrades.length;
+
+    const winningTrades = closedTrades.filter(t => t.realizedProfit > 0);
+
+    const successfulTrades = winningTrades.length;
+
+    const totalProfit = closedTrades.reduce((sum, trade) =>
+      sum + (trade.realizedProfit || 0), 0);
+
+    const winRate =
+      totalClosedTrades > 0
+        ? (successfulTrades / totalClosedTrades) * 100
+        : 0;
+
+    const avgGainPerTrade =
+      totalClosedTrades > 0
+        ? totalProfit / totalClosedTrades
+        : 0;
 
     setAnalytics(prev => ({
       ...prev,
-      totalTrades,
+      totalTrades: totalClosedTrades,
       successfulTrades,
       totalProfit,
       winRate,
       avgGainPerTrade
     }));
   };
+
 
   // Styles
   const containerStyle = {
@@ -329,6 +394,129 @@ const Analytics = () => {
     );
   }
 
+  const formatAIText = (text) => {
+    if (!text) return "";
+
+    // Remove markdown symbols
+    let cleaned = text
+      .replace(/#{1,6}\s?/g, '')      // remove ###
+      .replace(/\*\*/g, '')           // remove **
+      .replace(/---/g, '')            // remove ---
+      .replace(/\*/g, '')             // remove stray *
+      .trim();
+
+    return cleaned;
+  };
+
+  const extractGrade = (text) => {
+    const match = text?.match(/Grade:\s*([A-F])/i);
+    return match ? match[1].toUpperCase() : null;
+  };
+
+
+  const renderAIAnalysis = (text) => {
+    if (!text) return null;
+
+    const cleaned = formatAIText(text);
+    const lines = cleaned.split('\n').filter(l => l.trim() !== '');
+
+    return lines.map((line, index) => {
+      const lower = line.toLowerCase().trim();
+
+      const sections = {
+        'trade summary': '📌',
+        'what went right': '✅',
+        'what went wrong': '❌',
+        'risk check': '🛡️',
+        'what you should learn': '🎓',
+        'final grade': '🏁'
+      };
+
+      const sectionKey = Object.keys(sections).find(key =>
+        lower.startsWith(key)
+      );
+
+      // Section Headings
+      if (sectionKey) {
+        return (
+          <div
+            key={index}
+            style={{
+              marginTop: '25px',
+              marginBottom: '12px',
+              fontSize: '17px',
+              fontWeight: '700',
+              color: '#1a73e8',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <span>{sections[sectionKey]}</span>
+            <span>{line}</span>
+          </div>
+        );
+      }
+
+      // Bullet Points
+      if (line.startsWith('•')) {
+        return (
+          <div
+            key={index}
+            style={{
+              display: 'flex',
+              gap: '10px',
+              marginBottom: '8px',
+              paddingLeft: '12px',
+              fontSize: '14px',
+              lineHeight: '1.7',
+              color: '#202124'
+            }}
+          >
+            <span style={{ color: '#1a73e8', fontWeight: '700' }}>•</span>
+            <span>{line.replace('•', '').trim()}</span>
+          </div>
+        );
+      }
+
+      // Highlight Grade Line
+      if (lower.includes('grade')) {
+        return (
+          <div
+            key={index}
+            style={{
+              marginTop: '20px',
+              padding: '14px',
+              borderRadius: '12px',
+              backgroundColor: '#e8f0fe',
+              fontWeight: '700',
+              color: '#1a73e8',
+              fontSize: '15px'
+            }}
+          >
+            {line}
+          </div>
+        );
+      }
+
+      // Normal text
+      return (
+        <div
+          key={index}
+          style={{
+            marginBottom: '8px',
+            fontSize: '14px',
+            color: '#5f6368',
+            lineHeight: '1.7'
+          }}
+        >
+          {line}
+        </div>
+      );
+    });
+  };
+
+
   return (
     <div style={containerStyle}>
       <div style={headerStyle}>
@@ -362,21 +550,21 @@ const Analytics = () => {
           </div>
           <div style={{ fontSize: '14px', color: '#5f6368', fontWeight: '500' }}>Total Trades</div>
         </div>
-        
+
         <div style={statCardStyle}>
           <div style={{ fontSize: '2rem', fontWeight: 'bold', color: analytics.winRate >= 50 ? '#137333' : '#d93025', marginBottom: '5px' }}>
             {analytics.winRate.toFixed(1)}%
           </div>
           <div style={{ fontSize: '14px', color: '#5f6368', fontWeight: '500' }}>Win Rate</div>
         </div>
-        
+
         <div style={statCardStyle}>
           <div style={{ fontSize: '2rem', fontWeight: 'bold', color: analytics.totalProfit >= 0 ? '#137333' : '#d93025', marginBottom: '5px' }}>
             {formatCurrency(analytics.totalProfit)}
           </div>
           <div style={{ fontSize: '14px', color: '#5f6368', fontWeight: '500' }}>Total P&L</div>
         </div>
-        
+
         <div style={statCardStyle}>
           <div style={{ fontSize: '2rem', fontWeight: 'bold', color: analytics.avgGainPerTrade >= 0 ? '#137333' : '#d93025', marginBottom: '5px' }}>
             {formatCurrency(analytics.avgGainPerTrade)}
@@ -393,26 +581,26 @@ const Analytics = () => {
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
             <XAxis dataKey="date" stroke="#5f6368" fontSize={12} />
             <YAxis stroke="#5f6368" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'white', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'white',
                 border: '1px solid #dadce0',
                 borderRadius: '8px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
               }}
               formatter={(value) => formatCurrency(value)}
             />
-            <Area 
-              type="monotone" 
-              dataKey="value" 
-              stroke="#1a73e8" 
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#1a73e8"
               strokeWidth={2}
               fill="url(#colorGradient)"
             />
             <defs>
               <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#1a73e8" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#1a73e8" stopOpacity={0.0}/>
+                <stop offset="5%" stopColor="#1a73e8" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#1a73e8" stopOpacity={0.0} />
               </linearGradient>
             </defs>
           </AreaChart>
@@ -442,7 +630,7 @@ const Analytics = () => {
                   <option key={holding.symbol} value={holding.symbol}>{holding.symbol}</option>
                 ))}
               </select>
-              
+
               <div>
                 {['1D', '1W', '1M', '3M', '6M', '1Y'].map(period => (
                   <button
@@ -456,26 +644,27 @@ const Analytics = () => {
               </div>
             </div>
           </div>
-          
-          {stockChartData.length > 0 ? (
+
+          {Array.isArray(stockChartData) && stockChartData.length > 0 ? (
+
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={stockChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
                 <XAxis dataKey="date" stroke="#5f6368" fontSize={12} />
                 <YAxis stroke="#5f6368" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: '1px solid #dadce0',
                     borderRadius: '8px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
                   formatter={(value) => formatCurrency(value)}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="price" 
-                  stroke="#ea4335" 
+                <Line
+                  type="monotone"
+                  dataKey="price"
+                  stroke="#ea4335"
                   strokeWidth={2}
                   dot={{ fill: '#ea4335', strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, fill: '#ea4335' }}
@@ -483,10 +672,10 @@ const Analytics = () => {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ 
-              height: '350px', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <div style={{
+              height: '350px',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               color: '#5f6368',
               fontSize: '16px'
@@ -496,19 +685,175 @@ const Analytics = () => {
           )}
         </div>
 
-        {/* Stock Distribution Pie Chart */}
+        {/* ================= AI STOCK INTELLIGENCE ================= */}
+
+        {selectedStock && (
+          <div style={{
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "25px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            marginBottom: "30px"
+          }}>
+            <h3 style={{ marginBottom: "20px" }}>
+              🤖 AI Stock Intelligence — {selectedStock}
+            </h3>
+
+            {aiLoading ? (
+              <div style={{ padding: "30px", textAlign: "center" }}>
+                🔄 Running AI analysis...
+              </div>
+            ) : aiAnalysis ? (
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                gap: "20px"
+              }}>
+
+                {/* Sentiment */}
+                <div style={{
+                  padding: "15px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px"
+                }}>
+                  <h4>📰 Market Sentiment</h4>
+                  <div style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color:
+                      aiAnalysis.sentiment.label === "Bullish"
+                        ? "#137333"
+                        : aiAnalysis.sentiment.label === "Bearish"
+                          ? "#d93025"
+                          : "#5f6368"
+                  }}>
+                    {aiAnalysis.sentiment.label}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#5f6368" }}>
+                    Score: {aiAnalysis.sentiment.score}
+                  </div>
+                </div>
+
+                {/* Prediction */}
+                <div style={{
+                  padding: "15px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px"
+                }}>
+                  <h4>🔮 Price Prediction</h4>
+                  <div>Next Day: ₹{aiAnalysis.prediction.nextDay}</div>
+                  <div>Next Week: ₹{aiAnalysis.prediction.nextWeek}</div>
+                  <div style={{ fontSize: "13px", marginTop: "8px" }}>
+                    Confidence: {(aiAnalysis.prediction.confidence * 100).toFixed(0)}%
+                  </div>
+                </div>
+
+                {/* Technical Indicators */}
+                <div style={{
+                  padding: "15px",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "10px"
+                }}>
+                  <h4>📊 Technical Signals</h4>
+                  <div>SMA 20: ₹{aiAnalysis.technical.sma20?.toFixed(2)}</div>
+                  <div>SMA 50: ₹{aiAnalysis.technical.sma50?.toFixed(2)}</div>
+                  <div>RSI: {aiAnalysis.technical.rsi?.toFixed(2)}</div>
+                </div>
+
+                {/* Final Signal */}
+                <div style={{
+                  padding: "15px",
+                  borderRadius: "10px",
+                  backgroundColor:
+                    aiAnalysis.overallSignal === "BUY"
+                      ? "#e6f4ea"
+                      : aiAnalysis.overallSignal === "SELL"
+                        ? "#fce8e6"
+                        : "#f1f3f4"
+                }}>
+                  <h4>🎯 AI Recommendation</h4>
+                  <div style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    color:
+                      aiAnalysis.overallSignal === "BUY"
+                        ? "#137333"
+                        : aiAnalysis.overallSignal === "SELL"
+                          ? "#d93025"
+                          : "#5f6368"
+                  }}>
+                    {aiAnalysis.overallSignal}
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <div style={{ color: "#5f6368" }}>
+                No AI analysis available.
+              </div>
+            )}
+          </div>
+        )}
+
+
+      </div>
+
+      {/* ================= Portfolio Distribution + Monthly Volume ================= */}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.5fr 1fr",
+          gap: "30px",
+          marginBottom: "30px"
+        }}
+      >
+
+        {/* 📊 Monthly Trading Volume (LEFT) */}
         <div style={chartCardStyle}>
-          <h3 style={{ marginBottom: '20px', color: '#202124' }}>🥧 Portfolio Distribution</h3>
+          <h3 style={{ marginBottom: '20px', color: '#202124' }}>
+            📊 Monthly Trading Volume
+          </h3>
+
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={tradingVolumeData} barSize={30}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
+              <XAxis dataKey="month" stroke="#5f6368" fontSize={12} />
+              <YAxis stroke="#5f6368" fontSize={12} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #dadce0',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}
+              />
+              <Bar
+                dataKey="trades"
+                fill="#1a73e8"
+                radius={[6, 6, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+
+        {/* 🥧 Portfolio Distribution (RIGHT) */}
+        <div style={chartCardStyle}>
+          <h3 style={{ marginBottom: '20px', color: '#202124' }}>
+            🥧 Portfolio Distribution
+          </h3>
+
           {stockDistributionData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={350}>
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={stockDistributionData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
+                  innerRadius={55}
+                  outerRadius={95}
+                  paddingAngle={4}
                   dataKey="value"
                 >
                   {stockDistributionData.map((entry, index) => (
@@ -520,39 +865,22 @@ const Analytics = () => {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ 
-              height: '350px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: '#5f6368'
-            }}>
+            <div
+              style={{
+                height: '280px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#5f6368'
+              }}
+            >
               No current holdings to display
             </div>
           )}
         </div>
+
       </div>
 
-      {/* Trading Volume Chart */}
-      <div style={chartCardStyle}>
-        <h3 style={{ marginBottom: '20px', color: '#202124' }}>📊 Monthly Trading Volume</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={tradingVolumeData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f3f4" />
-            <XAxis dataKey="month" stroke="#5f6368" fontSize={12} />
-            <YAxis stroke="#5f6368" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'white', 
-                border: '1px solid #dadce0',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-              }}
-            />
-            <Bar dataKey="trades" fill="#1a73e8" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
         {/* Best Performer */}
@@ -572,13 +900,13 @@ const Analytics = () => {
                 </span>
               </div>
               <div style={{ fontSize: '0.9rem', color: '#5f6368', marginBottom: '10px' }}>
-                Current: {formatCurrency(analytics.bestPerformingStock.currentPrice)} | 
+                Current: {formatCurrency(analytics.bestPerformingStock.currentPrice)} |
                 Qty: {analytics.bestPerformingStock.quantity}
               </div>
-              <div style={{ 
-                marginTop: '15px', 
-                padding: '12px', 
-                backgroundColor: '#e8f5e8', 
+              <div style={{
+                marginTop: '15px',
+                padding: '12px',
+                backgroundColor: '#e8f5e8',
                 borderRadius: '8px',
                 fontSize: '14px',
                 color: '#137333',
@@ -611,19 +939,19 @@ const Analytics = () => {
                 </span>
               </div>
               <div style={{ fontSize: '0.9rem', color: '#5f6368', marginBottom: '10px' }}>
-                Current: {formatCurrency(analytics.worstPerformingStock.currentPrice)} | 
+                Current: {formatCurrency(analytics.worstPerformingStock.currentPrice)} |
                 Qty: {analytics.worstPerformingStock.quantity}
               </div>
-              <div style={{ 
-                marginTop: '15px', 
-                padding: '12px', 
-                backgroundColor: '#fef2f2', 
+              <div style={{
+                marginTop: '15px',
+                padding: '12px',
+                backgroundColor: '#fef2f2',
                 borderRadius: '8px',
                 fontSize: '14px',
                 color: '#d93025',
                 border: '1px solid #fecaca'
               }}>
-                {analytics.worstPerformingStock.profitLoss < 0 
+                {analytics.worstPerformingStock.profitLoss < 0
                   ? '📉 Underperforming - Consider reviewing position or stop-loss'
                   : '⚠️ Lowest performer - Monitor closely'}
               </div>
@@ -635,6 +963,129 @@ const Analytics = () => {
           )}
         </div>
       </div>
+
+
+
+      {/* ================= AI TRADE INTELLIGENCE SECTION ================= */}
+      <div style={{ ...cardStyle, marginTop: '50px' }}>
+        <h2 style={{
+          marginBottom: '25px',
+          color: '#202124',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          🤖 AI Trade Intelligence
+        </h2>
+
+        {aiTrades.length === 0 ? (
+          <div style={{
+            padding: '30px',
+            textAlign: 'center',
+            color: '#5f6368',
+            fontSize: '15px'
+          }}>
+            No AI reflections generated yet.
+          </div>
+        ) : (
+          aiTrades.map((trade) => {
+            const isProfit = trade.totalAmount >= 0;
+
+            const cleanedText = formatAIText(trade.aiAnalysis || '')
+              .replace(/Here’s a structured analysis.*?:/i, '')
+              .replace(/#{1,6}\s?/g, '')
+              .replace(/\*\*/g, '')
+              .replace(/---/g, '')
+              .trim();
+
+            const grade = extractGrade(cleanedText);
+
+            return (
+              <div
+                key={trade._id}
+                style={{
+                  marginBottom: '25px',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  border: '1px solid #e0e0e0',
+                  background: 'white',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.06)'
+                }}
+              >
+
+                {/* Header */}
+                <div
+                  style={{
+                    padding: '18px 22px',
+                    background: isProfit
+                      ? 'linear-gradient(90deg, #e6f4ea, #ffffff)'
+                      : 'linear-gradient(90deg, #fce8e6, #ffffff)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <div>
+                    <div style={{
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      color: '#202124'
+                    }}>
+                      {trade.symbol} — {trade.type}
+                    </div>
+
+                    <div style={{
+                      fontSize: '13px',
+                      marginTop: '4px',
+                      color: '#5f6368'
+                    }}>
+                      Executed at ₹{trade.price}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    color: isProfit ? '#137333' : '#d93025'
+                  }}>
+                    {formatCurrency(trade.totalAmount)}
+                  </div>
+                </div>
+
+                {/* Body */}
+                <details style={{ padding: '20px' }}>
+                  <summary style={{
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    marginBottom: '15px',
+                    fontSize: '14px',
+                    color: '#1a73e8'
+                  }}>
+                    📊 View Detailed AI Breakdown
+                  </summary>
+
+                  <div
+                    style={{
+                      maxHeight: '450px',
+                      overflowY: 'auto',
+                      padding: '24px',
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '16px',
+                      border: '1px solid #e8eaed'
+                    }}
+                  >
+                    {renderAIAnalysis(trade.aiAnalysis)}
+                  </div>
+                </details>
+
+
+              </div>
+            );
+          })
+        )}
+      </div>
+
+
     </div>
   );
 };

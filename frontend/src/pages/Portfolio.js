@@ -30,10 +30,48 @@ const Portfolio = () => {
   const navigate = useNavigate();
   const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5050/api';
 
-  // Fetch portfolios on component mount
+ useEffect(() => {
+  fetchPortfolios();
+
+  // 🔄 Auto refresh every 10 minutes
+  const interval = setInterval(async () => {
+    try {
+      await axios.get(`${API_BASE}/portfolio/refresh-all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      await fetchPortfolios();
+
+      console.log("🔄 Portfolio auto-refreshed (10 min)");
+    } catch (error) {
+      console.error("Auto refresh failed:", error);
+    }
+  }, 10 * 60 * 1000); // 10 minutes
+
+  return () => clearInterval(interval);
+}, []);
+
+
+  // 🔄 Auto refresh every 10 minutes
   useEffect(() => {
-    fetchPortfolios();
-  }, []);
+    const interval = setInterval(async () => {
+      try {
+        console.log('🔄 Auto refreshing portfolio prices...');
+
+        await axios.get(`${API_BASE}/portfolio/refresh-all`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        await fetchPortfolios();
+        console.log('✅ Portfolio auto refreshed');
+      } catch (error) {
+        console.log('⚠️ Auto refresh failed');
+      }
+    }, 10 * 60 * 1000); // 10 minutes
+
+    return () => clearInterval(interval);
+  }, [token]);
+
 
   const fetchPortfolios = async () => {
     setLoading(true);
@@ -138,7 +176,7 @@ const Portfolio = () => {
         `${API_BASE}/portfolio/${portfolio._id}/details`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       if (response.data.success) {
         setDetailedPortfolio(response.data.portfolio);
         console.log(`✅ Live prices loaded for ${portfolio.name}`);
@@ -173,6 +211,7 @@ const Portfolio = () => {
       return () => clearTimeout(timer);
     }
   }, [message]);
+
 
   // Styles
   const containerStyle = {
@@ -286,13 +325,18 @@ const Portfolio = () => {
       <div style={headerStyle}>
         <h1 style={titleStyle}>Portfolio Management</h1>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            style={{...buttonStyle, backgroundColor: '#34a853'}}
-            onClick={fetchPortfolios}
+          <button
+            style={{ ...buttonStyle, backgroundColor: '#34a853' }}
+            onClick={async () => {
+              await axios.get(`${API_BASE}/portfolio/refresh-all`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              await fetchPortfolios();
+            }}
           >
             🔄 Refresh Portfolio
           </button>
-          <button 
+          <button
             style={buttonStyle}
             onClick={() => setShowCreateModal(true)}
           >
@@ -311,7 +355,7 @@ const Portfolio = () => {
           <p style={{ color: '#5f6368', fontSize: '1.1rem', marginBottom: '30px' }}>
             Create your first portfolio to start trading and tracking your investments
           </p>
-          <button 
+          <button
             style={buttonStyle}
             onClick={() => setShowCreateModal(true)}
           >
@@ -319,7 +363,7 @@ const Portfolio = () => {
           </button>
         </div>
       ) : (
-        
+
         <div style={portfolioGridStyle}>
           {portfolios.map((portfolio, index) => (
             <div key={portfolio._id || index} style={portfolioCardStyle}>
@@ -331,7 +375,7 @@ const Portfolio = () => {
                   {portfolio.description}
                 </p>
               )}
-              
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <div style={{ color: '#5f6368', fontSize: '14px' }}>Total Value</div>
@@ -347,12 +391,12 @@ const Portfolio = () => {
                 </div>
                 <div>
                   <div style={{ color: '#5f6368', fontSize: '14px' }}>P&L</div>
-                  <div style={{ 
-                    fontSize: '1.2rem', 
-                    fontWeight: '600', 
-                    color: (portfolio.totalProfitLoss || 0) >= 0 ? '#137333' : '#d93025' 
+                  <div style={{
+                    fontSize: '1.2rem',
+                    fontWeight: '600',
+                    color: (portfolio.totalProfitLoss || 0) >= 0 ? '#137333' : '#d93025'
                   }}>
-                    {formatCurrency(portfolio.totalProfitLoss || 0)} 
+                    {formatCurrency(portfolio.totalProfitLoss || 0)}
                     ({(portfolio.totalProfitLossPercentage || 0).toFixed(2)}%)
                   </div>
                 </div>
@@ -363,9 +407,9 @@ const Portfolio = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <button 
+                <button
                   style={{
                     ...buttonStyle,
                     backgroundColor: '#34a853',
@@ -377,7 +421,7 @@ const Portfolio = () => {
                 >
                   View Details
                 </button>
-                <button 
+                <button
                   style={{
                     ...buttonStyle,
                     backgroundColor: 'transparent',
@@ -391,7 +435,7 @@ const Portfolio = () => {
                 >
                   Trade Now
                 </button>
-                <button 
+                <button
                   style={{
                     ...buttonStyle,
                     backgroundColor: '#d93025',
@@ -416,7 +460,7 @@ const Portfolio = () => {
         }}>
           <div style={modalStyle}>
             <h2 style={{ marginBottom: '20px', color: '#202124' }}>Create New Portfolio</h2>
-            
+
             <form onSubmit={handleCreatePortfolio}>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
@@ -504,14 +548,14 @@ const Portfolio = () => {
         }}>
           <div style={{ ...modalStyle, maxWidth: '500px' }}>
             <h2 style={{ marginBottom: '20px', color: '#d93025' }}>⚠️ Delete Portfolio</h2>
-            
+
             <p style={{ fontSize: '16px', marginBottom: '20px', color: '#202124' }}>
               Are you sure you want to delete <strong>"{portfolioToDelete.name}"</strong>?
             </p>
-            
-            <div style={{ 
-              backgroundColor: '#fef2f2', 
-              padding: '15px', 
+
+            <div style={{
+              backgroundColor: '#fef2f2',
+              padding: '15px',
               borderRadius: '8px',
               marginBottom: '20px',
               border: '1px solid #fecaca'
@@ -521,7 +565,7 @@ const Portfolio = () => {
               </p>
               {portfolioToDelete.holdings && portfolioToDelete.holdings.length > 0 && (
                 <p style={{ margin: '10px 0 0 0', fontSize: '14px', color: '#d93025' }}>
-                  This portfolio has {portfolioToDelete.holdings.length} active holding(s). 
+                  This portfolio has {portfolioToDelete.holdings.length} active holding(s).
                   Please sell all stocks before deleting.
                 </p>
               )}
@@ -590,7 +634,7 @@ const Portfolio = () => {
                     Created: {new Date(detailedPortfolio.createdAt).toLocaleDateString()}
                   </span>
                 </h2>
-                
+
                 {detailedPortfolio.description && (
                   <p style={{ color: '#5f6368', marginBottom: 20, fontStyle: 'italic' }}>
                     {detailedPortfolio.description}
@@ -599,9 +643,9 @@ const Portfolio = () => {
 
                 {/* Key Metrics Grid */}
                 <div style={{
-                  display: "grid", 
-                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
-                  gap: 20, 
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                  gap: 20,
                   marginBottom: 20,
                   padding: 20,
                   backgroundColor: '#f8f9fa',
@@ -632,67 +676,67 @@ const Portfolio = () => {
                       fontSize: 22,
                       color: (detailedPortfolio.totalProfitLoss || 0) >= 0 ? "#137333" : "#d93025"
                     }}>
-                      {formatCurrency(detailedPortfolio.totalProfitLoss || 0)} 
-                      <span style={{fontSize: 16, marginLeft: 4}}>
+                      {formatCurrency(detailedPortfolio.totalProfitLoss || 0)}
+                      <span style={{ fontSize: 16, marginLeft: 4 }}>
                         ({(detailedPortfolio.totalProfitLossPercentage || 0).toFixed(2)}%)
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <hr style={{margin: '20px 0', border: 'none', borderTop: '1px solid #dadce0'}} />
+                <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid #dadce0' }} />
 
                 {/* Holdings Section */}
                 <div>
-                  <div style={{marginBottom: 12, fontWeight: 600, fontSize: 18, color: '#202124'}}>
+                  <div style={{ marginBottom: 12, fontWeight: 600, fontSize: 18, color: '#202124' }}>
                     📊 Holdings ({detailedPortfolio.holdings?.length || 0})
                   </div>
                   {detailedPortfolio.holdings && detailedPortfolio.holdings.length > 0 ? (
                     <div style={{ overflowX: "auto" }}>
                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                         <thead>
-                          <tr style={{backgroundColor: "#f1f3f4"}}>
-                            <th style={{padding: '10px 8px', textAlign: 'left'}}>Symbol</th>
-                            <th style={{padding: '10px 8px', textAlign: 'center'}}>Qty</th>
-                            <th style={{padding: '10px 8px', textAlign: 'right'}}>Avg Price</th>
-                            <th style={{padding: '10px 8px', textAlign: 'right'}}>Current</th>
-                            <th style={{padding: '10px 8px', textAlign: 'right'}}>Total Value</th>
-                            <th style={{padding: '10px 8px', textAlign: 'right'}}>P&L</th>
-                            <th style={{padding: '10px 8px', textAlign: 'center'}}>Updated</th>
+                          <tr style={{ backgroundColor: "#f1f3f4" }}>
+                            <th style={{ padding: '10px 8px', textAlign: 'left' }}>Symbol</th>
+                            <th style={{ padding: '10px 8px', textAlign: 'center' }}>Qty</th>
+                            <th style={{ padding: '10px 8px', textAlign: 'right' }}>Avg Price</th>
+                            <th style={{ padding: '10px 8px', textAlign: 'right' }}>Current</th>
+                            <th style={{ padding: '10px 8px', textAlign: 'right' }}>Total Value</th>
+                            <th style={{ padding: '10px 8px', textAlign: 'right' }}>P&L</th>
+                            <th style={{ padding: '10px 8px', textAlign: 'center' }}>Updated</th>
                           </tr>
                         </thead>
                         <tbody>
                           {detailedPortfolio.holdings.map((h, i) => (
                             <tr key={i} style={{
-                              textAlign: "center", 
+                              textAlign: "center",
                               background: i % 2 === 0 ? "#fff" : "#fafafa",
                               borderBottom: '1px solid #e0e0e0'
                             }}>
-                              <td style={{padding: '10px 8px', fontWeight: 600, textAlign: 'left', color: '#1a73e8'}}>
+                              <td style={{ padding: '10px 8px', fontWeight: 600, textAlign: 'left', color: '#1a73e8' }}>
                                 {h.symbol}
                               </td>
-                              <td style={{padding: '10px 8px'}}>{h.quantity}</td>
-                              <td style={{padding: '10px 8px', textAlign: 'right'}}>
+                              <td style={{ padding: '10px 8px' }}>{h.quantity}</td>
+                              <td style={{ padding: '10px 8px', textAlign: 'right' }}>
                                 {formatCurrency(h.averagePrice)}
                               </td>
-                              <td style={{padding: '10px 8px', textAlign: 'right'}}>
+                              <td style={{ padding: '10px 8px', textAlign: 'right' }}>
                                 {h.currentPrice ? formatCurrency(h.currentPrice) : '-'}
                               </td>
-                              <td style={{padding: '10px 8px', textAlign: 'right', fontWeight: 600}}>
+                              <td style={{ padding: '10px 8px', textAlign: 'right', fontWeight: 600 }}>
                                 {formatCurrency(h.totalValue)}
                               </td>
                               <td style={{
-                                padding: '10px 8px', 
+                                padding: '10px 8px',
                                 textAlign: 'right',
-                                color: h.profitLoss >= 0 ? "#137333" : "#d93025", 
+                                color: h.profitLoss >= 0 ? "#137333" : "#d93025",
                                 fontWeight: 600
                               }}>
-                                {formatCurrency(h.profitLoss)} 
-                                <div style={{fontSize: 12}}>
+                                {formatCurrency(h.profitLoss)}
+                                <div style={{ fontSize: 12 }}>
                                   ({h.profitLossPercentage?.toFixed(2)}%)
                                 </div>
                               </td>
-                              <td style={{padding: '10px 8px', fontSize: 12, color: '#5f6368'}}>
+                              <td style={{ padding: '10px 8px', fontSize: 12, color: '#5f6368' }}>
                                 {h.lastUpdated ? new Date(h.lastUpdated).toLocaleTimeString() : '-'}
                               </td>
                             </tr>
@@ -701,9 +745,9 @@ const Portfolio = () => {
                       </table>
                     </div>
                   ) : (
-                    <div style={{ 
-                      color: '#888', 
-                      fontStyle: 'italic', 
+                    <div style={{
+                      color: '#888',
+                      fontStyle: 'italic',
                       marginTop: 12,
                       padding: 30,
                       textAlign: 'center',

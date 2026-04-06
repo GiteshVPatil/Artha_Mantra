@@ -9,7 +9,7 @@ import axios from 'axios';
 const Dashboard = () => {
   const { user, token } = useAuth();
   const { isConnected } = useSocket();
-  
+
   // State for real data
   const [portfolios, setPortfolios] = useState([]);
   const [recentTrades, setRecentTrades] = useState([]);
@@ -36,7 +36,7 @@ const Dashboard = () => {
   // Fetch data on component mount
   useEffect(() => {
     fetchDashboardData();
-    
+
     // Refresh every 30 seconds
     const interval = setInterval(fetchDashboardData, 30000);
     return () => clearInterval(interval);
@@ -46,7 +46,7 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch portfolios
       const portfolioResponse = await axios.get(`${API_BASE}/portfolio`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -56,7 +56,7 @@ const Dashboard = () => {
 
 
       // Fetch recent trades
-      const tradesResponse = await axios.get(`${API_BASE}/trading/history?limit=10`, {
+      const tradesResponse = await axios.get(`${API_BASE}/trading/history?limit=1000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const trades = tradesResponse.data.trades || [];
@@ -68,11 +68,11 @@ const Dashboard = () => {
         const totalValue = portfolioList.reduce((sum, p) => sum + (p.currentValue || p.initialAmount || 0), 0);
         const totalProfitLoss = portfolioList.reduce((sum, p) => sum + (p.totalProfitLoss || 0), 0);
         const availableCash = portfolioList.reduce((sum, p) => sum + (p.availableCash || 0), 0);
-        
+
         // Find best performing holding
         let bestPerformer = null;
         let maxReturn = -Infinity;
-        
+
         portfolioList.forEach(portfolio => {
           if (portfolio.holdings) {
             portfolio.holdings.forEach(holding => {
@@ -90,13 +90,21 @@ const Dashboard = () => {
         });
 
 
-        // Calculate win rate (profitable trades vs total trades)
-        let winCount = 0;
-        let totalCount = trades.length;
-        trades.forEach(trade => {
-          if (trade.profitLoss > 0) winCount++;
-        });
-        const winRate = totalCount > 0 ? (winCount / totalCount) * 100 : 0;
+        // Calculate win rate (only SELL trades with realized profit)
+        const sellTrades = trades.filter(
+          trade => trade.type === 'SELL' && trade.status === 'EXECUTED'
+        );
+
+        const winCount = sellTrades.filter(
+          trade => trade.realizedProfit > 0
+        ).length;
+
+        const totalCount = sellTrades.length;
+
+        const winRate = totalCount > 0
+          ? (winCount / totalCount) * 100
+          : 0;
+
 
 
         setDashboardStats({
@@ -251,10 +259,10 @@ const Dashboard = () => {
     {
       title: 'Total Portfolio Value',
       value: formatCurrency(dashboardStats.totalValue),
-      change: dashboardStats.totalProfitLoss >= 0 
-        ? `+${formatCurrency(dashboardStats.totalProfitLoss)}` 
+      change: dashboardStats.totalProfitLoss >= 0
+        ? `+${formatCurrency(dashboardStats.totalProfitLoss)}`
         : `${formatCurrency(dashboardStats.totalProfitLoss)}`,
-      changePercent: dashboardStats.totalValue > 0 
+      changePercent: dashboardStats.totalValue > 0
         ? ((dashboardStats.totalProfitLoss / (dashboardStats.totalValue - dashboardStats.totalProfitLoss)) * 100).toFixed(2)
         : 0,
       isPositive: dashboardStats.totalProfitLoss >= 0,
@@ -262,11 +270,11 @@ const Dashboard = () => {
     },
     {
       title: "Total P&L",
-      value: dashboardStats.totalProfitLoss >= 0 
-        ? `+${formatCurrency(dashboardStats.totalProfitLoss)}` 
+      value: dashboardStats.totalProfitLoss >= 0
+        ? `+${formatCurrency(dashboardStats.totalProfitLoss)}`
         : `${formatCurrency(Math.abs(dashboardStats.totalProfitLoss))}`,
       change: `${dashboardStats.totalValue > 0 ? ((dashboardStats.totalProfitLoss / (dashboardStats.totalValue - dashboardStats.totalProfitLoss)) * 100).toFixed(2) : 0}%`,
-      changePercent: dashboardStats.totalValue > 0 
+      changePercent: dashboardStats.totalValue > 0
         ? ((dashboardStats.totalProfitLoss / (dashboardStats.totalValue - dashboardStats.totalProfitLoss)) * 100).toFixed(2)
         : 0,
       isPositive: dashboardStats.totalProfitLoss >= 0,
@@ -329,8 +337,8 @@ const Dashboard = () => {
             <div style={statValueStyle}>{stat.value}</div>
             <div style={{
               ...statChangeStyle,
-              color: stat.isPositive === true ? '#137333' : 
-                     stat.isPositive === false ? '#d93025' : '#5f6368'
+              color: stat.isPositive === true ? '#137333' :
+                stat.isPositive === false ? '#d93025' : '#5f6368'
             }}>
               {stat.change} {stat.changePercent !== null && `(${stat.changePercent}%)`}
             </div>
@@ -351,8 +359,8 @@ const Dashboard = () => {
           {recentTrades.length > 0 ? (
             <div>
               {recentTrades.map((trade, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   style={tradeItemStyle}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -365,8 +373,8 @@ const Dashboard = () => {
                       {new Date(trade.createdAt).toLocaleDateString()} at {formatCurrency(trade.price)}
                     </div>
                   </div>
-                  <div style={{ 
-                    fontWeight: '600', 
+                  <div style={{
+                    fontWeight: '600',
                     color: trade.type === 'BUY' ? '#d93025' : '#137333',
                     fontSize: '14px'
                   }}>
@@ -376,7 +384,7 @@ const Dashboard = () => {
                 </div>
               ))}
               <div style={{ marginTop: '16px' }}>
-                <Link 
+                <Link
                   to="/trading"
                   style={{
                     display: 'inline-block',
@@ -437,14 +445,14 @@ const Dashboard = () => {
       {portfolios.length > 0 && (
         <div style={{ ...cardStyle, marginTop: '20px' }}>
           <h3 style={{ ...cardTitleStyle, fontSize: '1.1rem' }}>💼 Portfolio Overview</h3>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '15px'
           }}>
             {portfolios.slice(0, 3).map((portfolio, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 style={{
                   padding: '15px',
                   backgroundColor: '#f8f9fa',
@@ -464,7 +472,7 @@ const Dashboard = () => {
                   fontWeight: '500'
                 }}>
                   {(portfolio.totalProfitLoss || 0) >= 0 ? '+' : ''}
-                  {formatCurrency(portfolio.totalProfitLoss || 0)} 
+                  {formatCurrency(portfolio.totalProfitLoss || 0)}
                   ({(portfolio.totalProfitLossPercentage || 0).toFixed(2)}%)
                 </div>
                 <div style={{ fontSize: '12px', color: '#5f6368', marginTop: '8px' }}>
@@ -479,8 +487,8 @@ const Dashboard = () => {
 
       {/* Action Buttons */}
       <div style={{ marginTop: '30px', display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-        <Link 
-          to="/portfolio" 
+        <Link
+          to="/portfolio"
           style={{
             backgroundColor: '#1a73e8',
             color: 'white',
@@ -496,8 +504,8 @@ const Dashboard = () => {
         >
           📋 Manage Portfolio
         </Link>
-        <Link 
-          to="/trading" 
+        <Link
+          to="/trading"
           style={{
             backgroundColor: '#34a853',
             color: 'white',
@@ -513,8 +521,8 @@ const Dashboard = () => {
         >
           🚀 Start Trading
         </Link>
-        <Link 
-          to="/market" 
+        <Link
+          to="/market"
           style={{
             backgroundColor: '#fbbc04',
             color: '#202124',
@@ -530,8 +538,8 @@ const Dashboard = () => {
         >
           📊 View Market
         </Link>
-        <Link 
-          to="/analytics" 
+        <Link
+          to="/analytics"
           style={{
             backgroundColor: '#ea4335',
             color: 'white',
@@ -547,7 +555,7 @@ const Dashboard = () => {
         >
           📈 Analytics
         </Link>
-        <button 
+        <button
           onClick={fetchDashboardData}
           style={{
             backgroundColor: 'white',
