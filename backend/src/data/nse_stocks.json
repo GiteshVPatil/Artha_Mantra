@@ -49,13 +49,6 @@
     "currency": "INR"
   },
   {
-    "symbol": "5PAISA-RE",
-    "name": "5Paisa Capital Limited-RE",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
     "symbol": "63MOONS",
     "name": "63 moons technologies limited",
     "exchange": "NSE",
@@ -12040,13 +12033,6 @@
     "currency": "INR"
   },
   {
-    "symbol": "SABEVENTS",
-    "name": "Sab Events & Governance Now Media Limited",
-    "exchange": "NSE",
-    "region": "India",
-    "currency": "INR"
-  },
-  {
     "symbol": "SADBHAV",
     "name": "Sadbhav Engineering Limited",
     "exchange": "NSE",
@@ -12091,6 +12077,13 @@
   {
     "symbol": "SAGILITY",
     "name": "SAGILITY LIMITED",
+    "exchange": "NSE",
+    "region": "India",
+    "currency": "INR"
+  },
+  {
+    "symbol": "SAHLIBHFI",
+    "name": "Shalibhadra Finance Limited",
     "exchange": "NSE",
     "region": "India",
     "currency": "INR"

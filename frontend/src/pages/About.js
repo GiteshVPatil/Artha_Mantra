@@ -14,7 +14,7 @@ const About = () => {
             Meet Our Team
           </h1>
           <p style={{ fontSize: '1.2rem', opacity: '0.9', lineHeight: '1.6' }}>
-            Four passionate Computer Engineering students from SKNCOE, working together to revolutionize
+            Four passionate Computer Engineering students from KSOE, working together to revolutionize
             financial education through AI-driven innovation
           </p>
         </div>
@@ -159,7 +159,7 @@ const About = () => {
                   Gunwant Patil
                 </h3>
                 <p style={{ color: '#5f6368', fontSize: '0.95rem', marginBottom: '15px' }}>
-                  Computer Engineering | SKNCOE
+                  Computer Engineering | KSOE
                 </p>
                 <p style={{ color: '#5f6368', fontSize: '0.9rem', lineHeight: '1.5' }}>
                   Full-stack developer specializing in React.js and Node.js. Passionate about fintech
@@ -251,7 +251,7 @@ const About = () => {
                   Devesh Patil
                 </h3>
                 <p style={{ color: '#5f6368', fontSize: '0.95rem', marginBottom: '15px' }}>
-                  Computer Engineering | SKNCOE
+                  Computer Engineering | KSOE
                 </p>
                 <p style={{ color: '#5f6368', fontSize: '0.9rem', lineHeight: '1.5' }}>
                   Web development enthusiast specializing in chatbot integration and intelligent recommendation systems. 
@@ -289,7 +289,7 @@ const About = () => {
               </div>
             </div>
 
-            {/* Samadhan Shewale */}
+            {/* Gitesh Patil*/}
             <div style={{
               backgroundColor: '#f8f9fa',
               borderRadius: '20px',
@@ -318,8 +318,8 @@ const About = () => {
                   overflow: 'hidden'
                 }}>
                   <img
-                    src="/team-photos/samadhan-final.jpg"
-                    alt="Samadhan Shewale"
+                    src="/team-photos/gitesh-final.png"
+                    alt="Gitesh Patil"
                     style={{
                       width: '100%',
                       height: '100%',
@@ -340,10 +340,10 @@ const About = () => {
                   Backend Developer
                 </div>
                 <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: '#202124', fontWeight: '600' }}>
-                  Samadhan Shewale
+                  Gitesh Patil
                 </h3>
                 <p style={{ color: '#5f6368', fontSize: '0.95rem', marginBottom: '15px' }}>
-                  Computer Engineering | SKNCOE
+                  Computer Engineering | KSOE
                 </p>
                 <p style={{ color: '#5f6368', fontSize: '0.9rem', lineHeight: '1.5' }}>
                   Backend architecture specialist focusing on API development, database optimization,
@@ -435,7 +435,7 @@ const About = () => {
                   Suyash Kutwal
                 </h3>
                 <p style={{ color: '#5f6368', fontSize: '0.95rem', marginBottom: '15px' }}>
-                  Computer Engineering | SKNCOE
+                  Computer Engineering | KSOE
                 </p>
                 <p style={{ color: '#5f6368', fontSize: '0.9rem', lineHeight: '1.5' }}>
                   Frontend developer and UI/UX designer focused on creating intuitive user experiences
@@ -585,8 +585,8 @@ const About = () => {
           <div style={{ marginBottom: '20px' }}>
             <div style={{ marginBottom: '20px' }}>
               <img
-                src="/skncoe-logo.jpg"
-                alt="SKNCOE Logo"
+                src="/ksoe-logo.png"
+                alt="KSOE Logo"
                 style={{
                   width: '80px',
                   height: '80px',
@@ -598,7 +598,7 @@ const About = () => {
 
           </div>
           <h2 style={{ fontSize: '2rem', marginBottom: '15px', fontWeight: '600' }}>
-            Smt. Kashibai Navale College of Engineering (SKNCOE)
+            Keystone School of Engineering (KSOE)
           </h2>
           <p style={{ fontSize: '1.1rem', marginBottom: '15px', opacity: '0.9' }}>
             Computer Engineering Department

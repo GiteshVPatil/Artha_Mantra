@@ -225,6 +225,12 @@ const Navbar = () => {
                     Portfolio
                   </Link>
                   <Link
+                    to="/guidelines"
+                    style={location.pathname === '/guidelines' ? activeLinkStyle : linkStyle}
+                  >
+                    Guidelines
+                  </Link>
+                  <Link
                     to="/trading"
                     style={location.pathname === '/trading' ? activeLinkStyle : linkStyle}
                   >

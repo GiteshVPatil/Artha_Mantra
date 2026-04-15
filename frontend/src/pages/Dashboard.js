@@ -32,7 +32,14 @@ const Dashboard = () => {
     return `₹${(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
   };
 
-
+  // redirect first time users to guidelines page
+  useEffect(() => {
+    const guidelinesAccepted = localStorage.getItem("guidelinesAccepted");
+    if (!guidelinesAccepted) {
+      window.location.href = "/guidelines";
+    }
+  }, []);
+  
   // Fetch data on component mount
   useEffect(() => {
     fetchDashboardData();

@@ -59,7 +59,7 @@ const Contact = () => {
               <div style={{ marginBottom: '30px' }}>
                 <h3 style={{ fontSize: '1.2rem', marginBottom: '10px', color: '#1a73e8' }}>🏫 College</h3>
                 <p style={{ color: '#5f6368', fontSize: '1rem' }}>
-                  Smt. Kashibai Navale College of Engineering<br/>
+                  Keystone School of Engineering<br/>
                   Computer Engineering Department<br/>
                   Pune, Maharashtra, India
                 </p>

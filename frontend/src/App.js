@@ -7,6 +7,7 @@ import { SocketProvider } from './context/SocketContext';
 import Analytics from './pages/Analytics';
 import Notifications from './pages/Notifications';
 import AIReport from "./pages/AIReport";
+import Guidelines from './pages/Guidelines';
 
 // Components
 import Navbar from './components/Layout/Navbar';
@@ -63,6 +64,7 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/ai-report" element={<AIReport />} />
+                  <Route path="/guidelines" element={<Guidelines />} />
                   <Route path="/dashboard" element={
                     <PrivateRoute>
                       <Dashboard />

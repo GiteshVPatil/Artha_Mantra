@@ -6,7 +6,7 @@ const News = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('trading-news');
+  const [selectedCategory, setSelectedCategory] = useState('india');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
@@ -14,17 +14,29 @@ const News = () => {
   const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5050/api';
 
   useEffect(() => {
-    fetchNews();
+    fetchNews(true);
     // eslint-disable-next-line
-  }, [selectedCategory, page]);
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    if (page > 1) {
+      fetchNews();
+    }
+    // eslint-disable-next-line
+  }, [page]);
 
   const fetchNews = async (reset = false) => {
     setLoading(true);
+
     try {
       let endpoint = '';
       let params = { page };
 
-      if (selectedCategory === 'trading-news') {
+      if (selectedCategory === 'india') {
+        endpoint = `${API_BASE}/news/india`;
+      } else if (selectedCategory === 'us') {
+        endpoint = `${API_BASE}/news/us`;
+      } else if (selectedCategory === 'trading-news') {
         endpoint = `${API_BASE}/news/trading-news`;
       } else if (searchQuery) {
         endpoint = `${API_BASE}/news/search`;
@@ -38,8 +50,12 @@ const News = () => {
 
       if (response.data.success) {
         const newArticles = response.data.articles || response.data.news || [];
-        setNews(reset ? newArticles : [...news, ...newArticles]);
-        setHasMore(response.data.hasMore !== false && newArticles.length > 0);
+
+        setNews(prev =>
+          reset ? newArticles : [...prev, ...newArticles]
+        );
+
+        setHasMore(newArticles.length > 0);
       }
     } catch (error) {
       console.error('Error fetching news:', error);
@@ -49,6 +65,8 @@ const News = () => {
   };
 
   const handleSearch = () => {
+    if (!searchQuery.trim()) return;
+
     setPage(1);
     setNews([]);
     setSelectedCategory('search');
@@ -60,7 +78,7 @@ const News = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -69,7 +87,7 @@ const News = () => {
     });
   };
 
-  // Styles
+  // Styles (same as yours)
   const containerStyle = {
     padding: '30px 20px',
     maxWidth: '1200px',
@@ -151,52 +169,29 @@ const News = () => {
     borderRadius: '12px',
     overflow: 'hidden',
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    transition: '0.2s ease',
     cursor: 'pointer'
   };
 
   const imageStyle = {
     width: '100%',
     height: '200px',
-    objectFit: 'cover',
-    backgroundColor: '#f1f3f4'
+    objectFit: 'cover'
   };
 
   const contentStyle = {
     padding: '20px'
   };
 
-  const articleTitleStyle = {
-    fontSize: '1.3rem',
-    fontWeight: '600',
-    color: '#202124',
-    marginBottom: '10px',
-    lineHeight: '1.4'
-  };
-
-  const descriptionStyle = {
-    color: '#5f6368',
-    fontSize: '14px',
-    lineHeight: '1.5',
-    marginBottom: '15px'
-  };
-
-  const metaStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '12px',
-    color: '#9aa0a6'
-  };
-
   return (
     <div style={containerStyle}>
       <div style={headerStyle}>
-        <h1 style={titleStyle}>📰 Trading News</h1>
+        <h1 style={titleStyle}>📰 Stock Market News</h1>
+
         <div style={searchContainerStyle}>
           <input
             type="text"
-            placeholder="Search news..."
+            placeholder="Search stocks, companies..."
             style={inputStyle}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -208,63 +203,62 @@ const News = () => {
         </div>
       </div>
 
+      {/* Categories */}
       <div style={categoryStyle}>
-        {['trading-news', 'market-updates', 'crypto', 'economy'].map(category => (
+        {['india', 'us', 'trading-news', 'crypto'].map(category => (
           <button
             key={category}
-            style={selectedCategory === category ? activeCategoryStyle : categoryButtonStyle}
+            style={
+              selectedCategory === category
+                ? activeCategoryStyle
+                : categoryButtonStyle
+            }
             onClick={() => {
               setSelectedCategory(category);
               setPage(1);
               setNews([]);
             }}
           >
-            {category.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            {category.toUpperCase()}
           </button>
         ))}
       </div>
 
+      {/* News List */}
       {loading && news.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '50px' }}>
-          <div>Loading latest news...</div>
+          Loading latest market news...
         </div>
       ) : (
         <>
           <div style={newsGridStyle}>
             {news.map((article, index) => (
               <div
-                key={`${article.id}-${index}`}
+                key={index}
                 style={articleCardStyle}
                 onClick={() => window.open(article.url, '_blank')}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
-                }}
               >
                 {article.imageUrl && (
                   <img
                     src={article.imageUrl}
                     alt={article.title}
                     style={imageStyle}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
                   />
                 )}
+
                 <div style={contentStyle}>
-                  <h3 style={articleTitleStyle}>{article.title}</h3>
-                  {article.description && (
-                    <p style={descriptionStyle}>
-                      {article.description.length > 120
-                        ? `${article.description.substring(0, 120)}...`
-                        : article.description}
-                    </p>
-                  )}
-                  <div style={metaStyle}>
+                  <h3>{article.title}</h3>
+
+                  <p>
+                    {article.description?.substring(0, 120)}...
+                  </p>
+
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: '12px',
+                    color: '#666'
+                  }}>
                     <span>{article.source}</span>
                     <span>{formatDate(article.publishedAt)}</span>
                   </div>
@@ -276,20 +270,11 @@ const News = () => {
           {hasMore && !loading && (
             <div style={{ textAlign: 'center' }}>
               <button
-                style={{
-                  ...buttonStyle,
-                  backgroundColor: '#34a853'
-                }}
+                style={{ ...buttonStyle, backgroundColor: '#34a853' }}
                 onClick={handleLoadMore}
               >
-                Load More News
+                Load More
               </button>
-            </div>
-          )}
-
-          {loading && news.length > 0 && (
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <div>Loading more news...</div>
             </div>
           )}
         </>

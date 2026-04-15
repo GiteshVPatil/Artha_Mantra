@@ -103,7 +103,7 @@ const Footer = () => {
               <b>Developed by</b> <br />
               Gunwant Patil <br />
               Devesh Patil <br />
-              Samadhan Shewale <br />
+              Gitesh Patil <br />
               Suyash Kutwal <br />
               <b>Guided by </b>Prof. P. N. Railkar
             </p>

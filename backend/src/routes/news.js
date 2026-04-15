@@ -50,6 +50,101 @@ router.get('/trading-news', auth, async (req, res) => {
     });
   }
 });
+router.get('/us', async (req, res) => {
+  try {
+    const API_KEY = process.env.NEWS_API_KEY;
+
+    const response = await axios.get('https://newsapi.org/v2/everything', {
+      params: {
+        q: 'Nasdaq OR Dow Jones OR S&P 500 OR US stock market',
+        language: 'en',
+        sortBy: 'publishedAt',
+        pageSize: 10,
+        apiKey: API_KEY
+      }
+    });
+
+    const articles = response.data.articles.map((a, i) => ({
+      id: i,
+      title: a.title,
+      description: a.description,
+      url: a.url,
+      imageUrl: a.urlToImage,
+      source: a.source.name,
+      publishedAt: a.publishedAt
+    }));
+
+    res.json({ success: true, articles });
+
+  } catch (error) {
+    console.error('US news error:', error.message);
+    res.json({ success: false, articles: [] });
+  }
+});
+
+router.get('/india', async (req, res) => {
+  try {
+    const API_KEY = process.env.NEWS_API_KEY;
+
+    const response = await axios.get('https://newsapi.org/v2/everything', {
+      params: {
+        q: 'NSE OR BSE OR Sensex OR Nifty OR Indian stock market',
+        language: 'en',
+        sortBy: 'publishedAt',
+        pageSize: 10,
+        apiKey: API_KEY
+      }
+    });
+
+    const articles = response.data.articles.map((a, i) => ({
+      id: i,
+      title: a.title,
+      description: a.description,
+      url: a.url,
+      imageUrl: a.urlToImage,
+      source: a.source.name,
+      publishedAt: a.publishedAt
+    }));
+
+    res.json({ success: true, articles });
+
+  } catch (error) {
+    console.error('India news error:', error.message);
+    res.json({ success: false, articles: [] });
+  }
+});
+
+router.get('/crypto', async (req, res) => {
+  try {
+    const API_KEY = process.env.NEWS_API_KEY;
+
+    const response = await axios.get('https://newsapi.org/v2/everything', {
+      params: {
+        q: 'crypto OR bitcoin OR ethereum OR blockchain',
+        language: 'en',
+        sortBy: 'publishedAt',
+        pageSize: 10,
+        apiKey: API_KEY
+      }
+    });
+
+    const articles = response.data.articles.map((a, i) => ({
+      id: i,
+      title: a.title,
+      description: a.description,
+      url: a.url,
+      imageUrl: a.urlToImage,
+      source: a.source.name,
+      publishedAt: a.publishedAt
+    }));
+
+    res.json({ success: true, articles });
+
+  } catch (error) {
+    console.error('Crypto news error:', error.message);
+    res.json({ success: false, articles: [] });
+  }
+});
 
 /* ---------- GET STOCK-SPECIFIC NEWS ---------- */
 router.get('/stock-news/:symbol', auth, async (req, res) => {
