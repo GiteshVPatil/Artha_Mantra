@@ -1,1 +1,0 @@
-# Artha_Mantra
