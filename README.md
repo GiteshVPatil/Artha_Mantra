@@ -92,17 +92,7 @@ npm start
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5050
 
-### Alternative: Using Docker
 
-1. **Install Docker Desktop**:
-```bash
-brew install --cask docker
-```
-
-2. **Start with Docker**:
-```bash
-docker-compose up --build
-```
 
 ## API Keys Required
 
@@ -163,10 +153,7 @@ npm run lint         # Check code style
 
 ## Deployment
 
-### Using Docker
-```bash
-./scripts/deploy.sh
-```
+
 
 ### Manual Deployment
 1. Build frontend: `cd frontend && npm run build`
@@ -178,7 +165,7 @@ npm run lint         # Check code style
 - Suyash Kutwal (C43335)
 - Gunwant Patil (C43336)
 - Devesh Patil (C43337)
-- Samadhan Shewale (C43342)
+- Gitesh Patil(C43342)
 
 **Guided By**: Prof. V. S. Paithankar
 
